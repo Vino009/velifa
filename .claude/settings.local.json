@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell *)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(npx prisma *)",
+      "Bash(node -e ' *)",
+      "Bash(node -e \"const mysql = require\\('mysql2'\\); const conn = mysql.createConnection\\({ host: 'gateway01.eu-central-1.prod.aws.tidbcloud.com', port: 4000, user: '28qTTquDASg79bm.root', password: 'l4QSRiDjsubOBt7d', database: 'velifa' }\\); conn.connect\\(err => { console.log\\(err ? 'FAIL: '+err.message : 'SUCCESS \\(no SSL\\)'\\); conn.end\\(\\); }\\);\")",
+      "Bash(curl -s http://localhost:3001/api/v1/health)",
+      "Bash(curl -s http://localhost:3001/api/v1/analyses)",
+      "Bash(curl -s http://localhost:3001/api/v1/analyses/test)",
+      "Bash(netstat -ano)",
+      "Bash(docker *)",
+      "Bash(echo \"Backend started with PID $!\")",
+      "Bash(echo \"Frontend started with PID $!\")",
+      "Bash(cat /tmp/backend.log)",
+      "Bash(type /tmp/backend.log)",
+      "Bash(curl -s -X POST http://localhost:3001/api/v1/analyses -H 'Content-Type: application/json' -d '{\"url\": \"https://example.com\", \"strategy\": \"mobile\"}')",
+      "Bash(curl -s -X POST http://localhost:3001/api/v1/analyses -H 'Content-Type: application/json' -d '{\"url\": \"https://example.com\", \"email\": \"test@example.com\", \"cfTurnstileToken\": \"test-token\"}')",
+      "Bash(curl -s -N http://localhost:3001/api/v1/analyses/cPNzp2hWvReW0cCwtlIV0ObcLq/stream)",
+      "Bash(curl *)",
+      "Bash(rm -f /tmp/backend.log)",
+      "Read(//tmp/**)"
+    ]
+  }
+}

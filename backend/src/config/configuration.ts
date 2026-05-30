@@ -1,0 +1,75 @@
+import { plainToInstance } from 'class-transformer';
+import { IsEnum, IsInt, IsOptional, IsString, Min, validateSync } from 'class-validator';
+
+enum Environment {
+  Development = 'development',
+  Production = 'production',
+  Test = 'test',
+}
+
+class EnvironmentVariables {
+  @IsEnum(Environment)
+  NODE_ENV: Environment = Environment.Development;
+
+  @IsInt() @Min(1)
+  PORT: number = 3001;
+
+  @IsString() FRONTEND_URL: string = 'http://localhost:3000';
+  @IsString() DATABASE_URL: string = '';
+  @IsString() REDIS_URL: string = 'redis://localhost:6379';
+  @IsString() PAGESPEED_API_KEY: string = '';
+  @IsString() BROWSERLESS_API_KEY: string = '';
+  @IsString() BROWSERLESS_URL: string = 'https://chrome.browserless.io';
+  @IsString() CLOUDINARY_CLOUD_NAME: string = '';
+  @IsString() CLOUDINARY_API_KEY: string = '';
+  @IsString() CLOUDINARY_API_SECRET: string = '';
+  @IsString() BREVO_API_KEY: string = '';
+  @IsInt()    BREVO_TEMPLATE_ID: number = 1;
+  @IsString() BREVO_FROM_EMAIL: string = '';
+  @IsString() BREVO_FROM_NAME: string = 'VELIFA';
+  @IsString() WHATSAPP_NUMBER: string = '';
+  @IsString() TURNSTILE_SECRET_KEY: string = '';
+  @IsString() JWT_SECRET: string = '';
+  @IsOptional() @IsString() SENTRY_DSN?: string;
+}
+
+export function validate(config: Record<string, unknown>) {
+  const validated = plainToInstance(EnvironmentVariables, config, {
+    enableImplicitConversion: true,
+  });
+  const errors = validateSync(validated, { skipMissingProperties: false });
+  if (errors.length > 0) {
+    throw new Error(`Config validation error:\n${errors.toString()}`);
+  }
+  return validated;
+}
+
+export default () => ({
+  nodeEnv: process.env.NODE_ENV ?? 'development',
+  port: parseInt(process.env.PORT ?? '3001', 10),
+  frontendUrl: process.env.FRONTEND_URL ?? 'http://localhost:3000',
+  database:    { url: process.env.DATABASE_URL ?? '' },
+  redis:       { url: process.env.REDIS_URL ?? 'redis://localhost:6379' },
+  pagespeed:   { apiKey: process.env.PAGESPEED_API_KEY ?? '' },
+  browserless: {
+    apiKey: process.env.BROWSERLESS_API_KEY ?? '',
+    url:    process.env.BROWSERLESS_URL ?? 'https://chrome.browserless.io',
+  },
+  cloudinary: {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME ?? '',
+    apiKey:    process.env.CLOUDINARY_API_KEY ?? '',
+    apiSecret: process.env.CLOUDINARY_API_SECRET ?? '',
+  },
+  brevo: {
+    apiKey:     process.env.BREVO_API_KEY ?? '',
+    templateId: parseInt(process.env.BREVO_TEMPLATE_ID ?? '1', 10),
+    fromEmail:  process.env.BREVO_FROM_EMAIL ?? '',
+    fromName:   process.env.BREVO_FROM_NAME ?? 'VELIFA',
+  },
+  whatsapp: { number: process.env.WHATSAPP_NUMBER ?? '' },
+  security: {
+    turnstileSecretKey: process.env.TURNSTILE_SECRET_KEY ?? '',
+    jwtSecret:          process.env.JWT_SECRET ?? '',
+  },
+  sentry: { dsn: process.env.SENTRY_DSN ?? '' },
+});
