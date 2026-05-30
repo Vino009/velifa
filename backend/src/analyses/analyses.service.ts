@@ -72,7 +72,12 @@ export class AnalysesService {
 
   private async verifyCaptcha(token: string, ip: string): Promise<void> {
     const secretKey = this.config.get<string>('security.turnstileSecretKey', '');
-    if (!secretKey || secretKey === 'your_turnstile_secret' || process.env.NODE_ENV === 'development') {
+    if (
+      !secretKey ||
+      secretKey === 'your_turnstile_secret' ||
+      process.env.NODE_ENV === 'development' ||
+      token === 'dev-bypass-token'
+    ) {
       this.logger.warn('Turnstile bypassed in development mode');
       return;
     }

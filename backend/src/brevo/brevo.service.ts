@@ -18,15 +18,13 @@ export interface SendReportEmailDto {
 export class BrevoService {
   private readonly logger = new Logger(BrevoService.name);
   private readonly apiKey: string;
-  private readonly templateId: number;
   private readonly fromEmail: string;
   private readonly fromName: string;
 
   constructor(private readonly config: ConfigService) {
-    this.apiKey     = this.config.get<string>('brevo.apiKey', '');
-    this.templateId = this.config.get<number>('brevo.templateId', 1);
-    this.fromEmail  = this.config.get<string>('brevo.fromEmail', '');
-    this.fromName   = this.config.get<string>('brevo.fromName', 'VELIFA');
+    this.apiKey    = this.config.get<string>('brevo.apiKey', '');
+    this.fromEmail = this.config.get<string>('brevo.fromEmail', '');
+    this.fromName  = this.config.get<string>('brevo.fromName', 'VELIFA');
   }
 
   async sendReportEmail(dto: SendReportEmailDto): Promise<void> {
@@ -37,26 +35,36 @@ export class BrevoService {
 
     const scoreLabel = this.getScoreLabel(dto.scorePerformance);
     const scoreColor = this.getScoreColor(dto.scorePerformance);
+    const scoreHex   = this.getScoreHex(dto.scorePerformance);
+    const lcpStr = dto.lcp != null ? `${(dto.lcp / 1000).toFixed(1)}s` : 'N/A';
+    const clsStr = dto.cls != null ? dto.cls.toFixed(3) : 'N/A';
+    const tbtStr = dto.tbt != null ? `${Math.round(dto.tbt)}ms` : 'N/A';
+
+    const htmlContent = this.buildHtmlEmail({
+      urlSite:       dto.urlSite,
+      scoreGlobal:   dto.scorePerformance,
+      scoreLabel,
+      scoreColor,
+      scoreHex,
+      lcp:           lcpStr,
+      cls:           clsStr,
+      tbt:           tbtStr,
+      reportUrl:     dto.reportUrl,
+      whatsappUrl:   dto.whatsappUrl,
+      screenshotUrl:  dto.screenshotUrl ?? null,
+    });
+
+    this.logger.debug(`[BrevoService] Generated HTML email — length=${htmlContent.length}`);
+    this.logger.debug(`[BrevoService] HTML preview (first 2000 chars):\n${htmlContent.substring(0, 2000)}`);
 
     try {
       await axios.post(
         'https://api.brevo.com/v3/smtp/email',
         {
-          sender:  { email: this.fromEmail, name: this.fromName },
-          to:      [{ email: dto.toEmail }],
-          templateId: this.templateId,
-          params: {
-            url_site:       dto.urlSite,
-            score_global:   dto.scorePerformance,
-            score_label:    scoreLabel,
-            score_color:    scoreColor,
-            lcp:            dto.lcp != null ? `${(dto.lcp / 1000).toFixed(1)}s` : 'N/A',
-            cls:            dto.cls != null ? dto.cls.toFixed(3) : 'N/A',
-            tbt:            dto.tbt != null ? `${Math.round(dto.tbt)}ms` : 'N/A',
-            rapport_url:    dto.reportUrl,
-            whatsapp_url:   dto.whatsappUrl,
-            screenshot_url: dto.screenshotUrl ?? '',
-          },
+          sender:     { email: this.fromEmail, name: this.fromName },
+          to:         [{ email: dto.toEmail }],
+          subject:    'Votre rapport de performance VELIFA',
+          htmlContent,
         },
         {
           headers: {
@@ -70,7 +78,7 @@ export class BrevoService {
     } catch (error: any) {
       const msg = error.response?.data?.message ?? error.message;
       this.logger.warn(`Email failed (non-blocking): ${msg}`);
-      throw error; // Let caller handle non-blocking
+      throw error;
     }
   }
 
@@ -84,5 +92,150 @@ export class BrevoService {
     if (score >= 90) return 'green';
     if (score >= 50) return 'orange';
     return 'red';
+  }
+
+  private getScoreHex(score: number): string {
+    if (score >= 90) return '#0CCE6B';
+    if (score >= 50) return '#FFA400';
+    return '#FF4E42';
+  }
+
+  private buildHtmlEmail(data: {
+    urlSite: string; scoreGlobal: number; scoreLabel: string;
+    scoreColor: string; scoreHex: string; lcp: string;
+    cls: string; tbt: string; reportUrl: string;
+    whatsappUrl: string; screenshotUrl: string | null;
+  }): string {
+    const gold1 = '#F4D88A';
+    const gold2 = '#D4AF37';
+    const gold3 = '#A87B1E';
+    const bg    = '#0A0A0A';
+    const card  = '#1A1A1A';
+    const border = '#2E2E2E';
+    const text  = '#FFFFFF';
+    const sub  = '#9A9A9A';
+
+    const gradientBar = `background: linear-gradient(90deg, ${gold1} 0%, ${gold2} 50%, ${gold3} 100%); -webkit-text-fill-color: transparent; -webkit-background-clip: text; background-clip: text;`;
+
+    const btnCTA = `display: inline-block; padding: 14px 32px; border-radius: 4px; font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; color: #0A0A0A; text-decoration: none; text-align: center; background: linear-gradient(135deg, ${gold1} 0%, ${gold2} 50%, ${gold3} 100%);`;
+
+    const btnSecondary = `display: inline-block; padding: 10px 24px; border-radius: 4px; font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: bold; color: ${gold2}; text-decoration: none; text-align: center; border: 1px solid ${gold2};`;
+
+    const screenshotBlock = data.screenshotUrl
+      ? `<tr><td style="padding: 24px 0 0 0; text-align: center;">
+           <img src="${data.screenshotUrl}" alt="Capture d'écran" width="560" style="border-radius: 6px; border: 1px solid ${border}; max-width: 100%; height: auto; display: block; margin: 0 auto;" />
+         </td></tr>`
+      : '';
+
+    return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Rapport de performance VELIFA</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: ${bg}; font-family: Arial, Helvetica, sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: ${bg};">
+<tr>
+<td align="center" style="padding: 40px 16px 40px 16px;">
+<table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; width: 100%;">
+
+  <!-- ── EN-TÊTE ──────────────────────────────────────────── -->
+  <tr>
+    <td style="background-color: ${card}; border: 1px solid ${border}; border-radius: 8px; padding: 32px 32px 24px 32px; text-align: center;">
+      <p style="margin: 0 0 4px 0; font-size: 28px; font-weight: bold; letter-spacing: 4px; color: ${gold2};">VELIFA</p>
+      <p style="margin: 0; font-size: 13px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase;">Performance Beyond Limits</p>
+    </td>
+  </tr>
+
+  <!-- ── URL ────────────────────────────────────────────── -->
+  <tr>
+    <td style="padding: 24px 0 0 0; text-align: center;">
+      <p style="margin: 0; font-size: 15px; color: ${sub};">Votre rapport pour</p>
+      <p style="margin: 6px 0 0 0; font-size: 16px; color: ${text}; font-weight: bold; word-break: break-all;">${data.urlSite}</p>
+    </td>
+  </tr>
+
+  <!-- ── SCORE GLOBAL ───────────────────────────────────── -->
+  <tr>
+    <td style="padding: 24px 0 0 0;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td style="background-color: ${card}; border: 1px solid ${border}; border-radius: 8px; padding: 40px 32px; text-align: center;">
+            <p style="margin: 0 0 8px 0; font-size: 13px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase;">Score global</p>
+            <p style="margin: 0 0 8px 0; font-size: 80px; font-weight: bold; line-height: 1; color: ${data.scoreHex};">${data.scoreGlobal}</p>
+            <p style="margin: 0; font-size: 16px; font-weight: bold; color: ${data.scoreHex};">${data.scoreLabel}</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <!-- ── CORE WEB VITALS ─────────────────────────────────── -->
+  <tr>
+    <td style="padding: 16px 0 0 0;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: ${card}; border: 1px solid ${border}; border-radius: 8px; overflow: hidden;">
+        <!-- header row -->
+        <tr>
+          <td colspan="3" style="padding: 14px 20px; border-bottom: 1px solid ${border};">
+            <p style="margin: 0; font-size: 13px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase; text-align: center;">Core Web Vitals</p>
+          </td>
+        </tr>
+        <!-- data row -->
+        <tr>
+          <!-- LCP -->
+          <td width="33%" style="padding: 20px 8px; text-align: center; border-right: 1px solid ${border};">
+            <p style="margin: 0 0 4px 0; font-size: 11px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase;">LCP</p>
+            <p style="margin: 0; font-size: 22px; font-weight: bold; color: ${text};">${data.lcp}</p>
+            <p style="margin: 4px 0 0 0; font-size: 10px; color: ${sub};">Chargement</p>
+          </td>
+          <!-- CLS -->
+          <td width="33%" style="padding: 20px 8px; text-align: center; border-right: 1px solid ${border};">
+            <p style="margin: 0 0 4px 0; font-size: 11px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase;">CLS</p>
+            <p style="margin: 0; font-size: 22px; font-weight: bold; color: ${text};">${data.cls}</p>
+            <p style="margin: 4px 0 0 0; font-size: 10px; color: ${sub};">Stabilité</p>
+          </td>
+          <!-- TBT -->
+          <td width="34%" style="padding: 20px 8px; text-align: center;">
+            <p style="margin: 0 0 4px 0; font-size: 11px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase;">TBT</p>
+            <p style="margin: 0; font-size: 22px; font-weight: bold; color: ${text};">${data.tbt}</p>
+            <p style="margin: 4px 0 0 0; font-size: 10px; color: ${sub};">Bloquant</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <!-- ── SCREENSHOT ─────────────────────────────────────── -->
+  ${screenshotBlock}
+
+  <!-- ── BOUTON PRINCIPAL ────────────────────────────────── -->
+  <tr>
+    <td style="padding: 32px 0 0 0; text-align: center;">
+      <a href="${data.reportUrl}" style="${btnCTA}">Voir le rapport complet</a>
+    </td>
+  </tr>
+
+  <!-- ── BOUTON SECONDAIRE ───────────────────────────────── -->
+  <tr>
+    <td style="padding: 12px 0 0 0; text-align: center;">
+      <a href="${data.whatsappUrl}" style="${btnSecondary}">Obtenir de l'aide via WhatsApp</a>
+    </td>
+  </tr>
+
+  <!-- ── PIED DE PAGE ────────────────────────────────────── -->
+  <tr>
+    <td style="padding: 40px 0 0 0; text-align: center; border-top: 1px solid ${border};">
+      <p style="margin: 0 0 4px 0; font-size: 12px; color: ${sub};">Envoyé par VELIFA</p>
+      <p style="margin: 0; font-size: 11px; color: #555555;">© 2026 VELIFA · Performance Beyond Limits</p>
+    </td>
+  </tr>
+
+</table>
+</td>
+</tr>
+</table>
+</body>
+</html>`;
   }
 }
