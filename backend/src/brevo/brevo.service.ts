@@ -106,26 +106,35 @@ export class BrevoService {
     cls: string; tbt: string; reportUrl: string;
     whatsappUrl: string; screenshotUrl: string | null;
   }): string {
-    const gold1 = '#F4D88A';
-    const gold2 = '#D4AF37';
-    const gold3 = '#A87B1E';
-    const bg    = '#0A0A0A';
-    const card  = '#1A1A1A';
-    const border = '#2E2E2E';
-    const text  = '#FFFFFF';
-    const sub  = '#9A9A9A';
+    const gold1   = '#F4D88A';
+    const gold2   = '#D4AF37';
+    const gold3   = '#A87B1E';
+    const bg      = '#0A0A0A';
+    const card    = '#1A1A1A';
+    const cardAlt = '#141414';
+    const border  = '#2E2E2E';
+    const text    = '#FFFFFF';
+    const sub     = '#9A9A9A';
+    const dimmed  = '#555555';
 
-    const gradientBar = `background: linear-gradient(90deg, ${gold1} 0%, ${gold2} 50%, ${gold3} 100%); -webkit-text-fill-color: transparent; -webkit-background-clip: text; background-clip: text;`;
+    const btnCTA = `display: inline-block; padding: 14px 36px; border-radius: 4px; font-family: Arial, Helvetica, sans-serif; font-size: 15px; font-weight: bold; color: #0A0A0A; text-decoration: none; text-align: center; background: linear-gradient(135deg, ${gold1} 0%, ${gold2} 50%, ${gold3} 100%);`;
 
-    const btnCTA = `display: inline-block; padding: 14px 32px; border-radius: 4px; font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; color: #0A0A0A; text-decoration: none; text-align: center; background: linear-gradient(135deg, ${gold1} 0%, ${gold2} 50%, ${gold3} 100%);`;
-
-    const btnSecondary = `display: inline-block; padding: 10px 24px; border-radius: 4px; font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: bold; color: ${gold2}; text-decoration: none; text-align: center; border: 1px solid ${gold2};`;
+    const btnSecondary = `display: inline-block; padding: 11px 28px; border-radius: 4px; font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: bold; color: ${gold2}; text-decoration: none; text-align: center; border: 1px solid ${gold2};`;
 
     const screenshotBlock = data.screenshotUrl
-      ? `<tr><td style="padding: 24px 0 0 0; text-align: center;">
-           <img src="${data.screenshotUrl}" alt="Capture d'écran" width="560" style="border-radius: 6px; border: 1px solid ${border}; max-width: 100%; height: auto; display: block; margin: 0 auto;" />
-         </td></tr>`
+      ? `<tr>
+    <td style="padding: 24px 0 0 0; text-align: center;">
+      <p style="margin: 0 0 12px 0; font-size: 12px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase;">
+        📸 &nbsp;Aperçu de votre site
+      </p>
+      <img src="${data.screenshotUrl}" alt="Capture d'écran"
+           width="560"
+           style="border-radius: 8px; border: 1px solid ${border}; max-width: 100%; height: auto; display: block; margin: 0 auto;" />
+    </td>
+  </tr>`
       : '';
+
+    const year = new Date().getFullYear();
 
     return `<!DOCTYPE html>
 <html lang="fr">
@@ -142,29 +151,38 @@ export class BrevoService {
 
   <!-- ── EN-TÊTE ──────────────────────────────────────────── -->
   <tr>
-    <td style="background-color: ${card}; border: 1px solid ${border}; border-radius: 8px; padding: 32px 32px 24px 32px; text-align: center;">
-      <p style="margin: 0 0 4px 0; font-size: 28px; font-weight: bold; letter-spacing: 4px; color: ${gold2};">VELIFA</p>
-      <p style="margin: 0; font-size: 13px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase;">Performance Beyond Limits</p>
+    <td style="background-color: ${card}; border: 1px solid ${border}; border-radius: 10px; padding: 36px 32px 28px 32px; text-align: center;">
+      <p style="margin: 0 0 6px 0; font-size: 30px; font-weight: bold; letter-spacing: 5px; color: ${gold2};">VELIFA</p>
+      <p style="margin: 0; font-size: 12px; color: ${sub}; letter-spacing: 2px; text-transform: uppercase;">Performance Beyond Limits</p>
     </td>
   </tr>
 
-  <!-- ── URL ────────────────────────────────────────────── -->
+  <!-- ── SALUTATION + URL ────────────────────────────────── -->
   <tr>
-    <td style="padding: 24px 0 0 0; text-align: center;">
-      <p style="margin: 0; font-size: 15px; color: ${sub};">Votre rapport pour</p>
-      <p style="margin: 6px 0 0 0; font-size: 16px; color: ${text}; font-weight: bold; word-break: break-all;">${data.urlSite}</p>
+    <td style="padding: 28px 0 0 0; text-align: center;">
+      <p style="margin: 0; font-size: 14px; color: ${sub};">Votre rapport de performance pour</p>
+      <p style="margin: 8px 0 0 0; font-size: 15px; color: ${text}; font-weight: bold; word-break: break-all;">${data.urlSite}</p>
+    </td>
+  </tr>
+
+  <!-- ── SÉPARATEUR ─────────────────────────────────────── -->
+  <tr>
+    <td style="padding: 20px 0 0 0; text-align: center;">
+      <div style="height: 1px; background: linear-gradient(90deg, transparent, ${border}, transparent);"></div>
     </td>
   </tr>
 
   <!-- ── SCORE GLOBAL ───────────────────────────────────── -->
   <tr>
-    <td style="padding: 24px 0 0 0;">
+    <td style="padding: 28px 0 0 0;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td style="background-color: ${card}; border: 1px solid ${border}; border-radius: 8px; padding: 40px 32px; text-align: center;">
-            <p style="margin: 0 0 8px 0; font-size: 13px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase;">Score global</p>
-            <p style="margin: 0 0 8px 0; font-size: 80px; font-weight: bold; line-height: 1; color: ${data.scoreHex};">${data.scoreGlobal}</p>
-            <p style="margin: 0; font-size: 16px; font-weight: bold; color: ${data.scoreHex};">${data.scoreLabel}</p>
+          <td style="background-color: ${card}; border: 1px solid ${border}; border-radius: 10px; padding: 36px 32px; text-align: center;">
+            <p style="margin: 0 0 10px 0; font-size: 12px; color: ${sub}; letter-spacing: 2px; text-transform: uppercase;">
+              🎯 &nbsp;Score global
+            </p>
+            <p style="margin: 0 0 8px 0; font-size: 76px; font-weight: bold; line-height: 1; color: ${data.scoreHex};">${data.scoreGlobal}</p>
+            <p style="margin: 0; font-size: 15px; font-weight: bold; color: ${data.scoreHex};">${data.scoreLabel}</p>
           </td>
         </tr>
       </table>
@@ -173,33 +191,35 @@ export class BrevoService {
 
   <!-- ── CORE WEB VITALS ─────────────────────────────────── -->
   <tr>
-    <td style="padding: 16px 0 0 0;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: ${card}; border: 1px solid ${border}; border-radius: 8px; overflow: hidden;">
+    <td style="padding: 20px 0 0 0;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: ${card}; border: 1px solid ${border}; border-radius: 10px; overflow: hidden;">
         <!-- header row -->
         <tr>
-          <td colspan="3" style="padding: 14px 20px; border-bottom: 1px solid ${border};">
-            <p style="margin: 0; font-size: 13px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase; text-align: center;">Core Web Vitals</p>
+          <td colspan="3" style="padding: 16px 20px 14px 20px; border-bottom: 1px solid ${border};">
+            <p style="margin: 0; font-size: 12px; color: ${sub}; letter-spacing: 2px; text-transform: uppercase; text-align: center;">
+              📊 &nbsp;Core Web Vitals
+            </p>
           </td>
         </tr>
         <!-- data row -->
         <tr>
           <!-- LCP -->
-          <td width="33%" style="padding: 20px 8px; text-align: center; border-right: 1px solid ${border};">
-            <p style="margin: 0 0 4px 0; font-size: 11px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase;">LCP</p>
-            <p style="margin: 0; font-size: 22px; font-weight: bold; color: ${text};">${data.lcp}</p>
-            <p style="margin: 4px 0 0 0; font-size: 10px; color: ${sub};">Chargement</p>
+          <td width="33%" style="padding: 22px 8px 20px 8px; text-align: center; border-right: 1px solid ${border};">
+            <p style="margin: 0 0 6px 0; font-size: 10px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase;">⚡ LCP</p>
+            <p style="margin: 0; font-size: 24px; font-weight: bold; color: ${text};">${data.lcp}</p>
+            <p style="margin: 6px 0 0 0; font-size: 10px; color: ${dimmed};">Chargement</p>
           </td>
           <!-- CLS -->
-          <td width="33%" style="padding: 20px 8px; text-align: center; border-right: 1px solid ${border};">
-            <p style="margin: 0 0 4px 0; font-size: 11px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase;">CLS</p>
-            <p style="margin: 0; font-size: 22px; font-weight: bold; color: ${text};">${data.cls}</p>
-            <p style="margin: 4px 0 0 0; font-size: 10px; color: ${sub};">Stabilité</p>
+          <td width="33%" style="padding: 22px 8px 20px 8px; text-align: center; border-right: 1px solid ${border};">
+            <p style="margin: 0 0 6px 0; font-size: 10px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase;">📐 CLS</p>
+            <p style="margin: 0; font-size: 24px; font-weight: bold; color: ${text};">${data.cls}</p>
+            <p style="margin: 6px 0 0 0; font-size: 10px; color: ${dimmed};">Stabilité visuelle</p>
           </td>
           <!-- TBT -->
-          <td width="34%" style="padding: 20px 8px; text-align: center;">
-            <p style="margin: 0 0 4px 0; font-size: 11px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase;">TBT</p>
-            <p style="margin: 0; font-size: 22px; font-weight: bold; color: ${text};">${data.tbt}</p>
-            <p style="margin: 4px 0 0 0; font-size: 10px; color: ${sub};">Bloquant</p>
+          <td width="34%" style="padding: 22px 8px 20px 8px; text-align: center;">
+            <p style="margin: 0 0 6px 0; font-size: 10px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase;">⏱ TBT</p>
+            <p style="margin: 0; font-size: 24px; font-weight: bold; color: ${text};">${data.tbt}</p>
+            <p style="margin: 6px 0 0 0; font-size: 10px; color: ${dimmed};">Temps bloquant</p>
           </td>
         </tr>
       </table>
@@ -209,25 +229,68 @@ export class BrevoService {
   <!-- ── SCREENSHOT ─────────────────────────────────────── -->
   ${screenshotBlock}
 
-  <!-- ── BOUTON PRINCIPAL ────────────────────────────────── -->
+  <!-- ── BOUTONS ────────────────────────────────────────── -->
   <tr>
     <td style="padding: 32px 0 0 0; text-align: center;">
-      <a href="${data.reportUrl}" style="${btnCTA}">Voir le rapport complet</a>
+      <a href="${data.reportUrl}" style="${btnCTA}">⚡ &nbsp;Voir le rapport complet</a>
     </td>
   </tr>
-
-  <!-- ── BOUTON SECONDAIRE ───────────────────────────────── -->
   <tr>
     <td style="padding: 12px 0 0 0; text-align: center;">
       <a href="${data.whatsappUrl}" style="${btnSecondary}">Obtenir de l'aide via WhatsApp</a>
     </td>
   </tr>
 
+  <!-- ── SÉPARATEUR ─────────────────────────────────────── -->
+  <tr>
+    <td style="padding: 36px 0 0 0; text-align: center;">
+      <div style="height: 1px; background: linear-gradient(90deg, transparent, ${border}, transparent);"></div>
+    </td>
+  </tr>
+
+  <!-- ── SIGNATURE SOCIAL ────────────────────────────────── -->
+  <tr>
+    <td style="padding: 28px 0 0 0; text-align: center;">
+      <p style="margin: 0 0 20px 0; font-size: 12px; color: ${sub}; letter-spacing: 2px; text-transform: uppercase;">
+        Suivez Velifa
+      </p>
+      <div style="display: flex; justify-content: center; align-items: center; gap: 28px;">
+        <!-- Twitter / X -->
+        <a href="https://twitter.com/velifa_io" target="_blank" rel="noopener noreferrer"
+           style="font-size: 14px; color: ${gold2}; text-decoration: none; font-weight: bold; letter-spacing: 1px;">
+          X
+        </a>
+        <span style="color: ${border}; font-size: 14px;">·</span>
+        <!-- LinkedIn -->
+        <a href="https://linkedin.com/company/velifa" target="_blank" rel="noopener noreferrer"
+           style="font-size: 14px; color: ${gold2}; text-decoration: none; font-weight: bold; letter-spacing: 1px;">
+          LinkedIn
+        </a>
+        <span style="color: ${border}; font-size: 14px;">·</span>
+        <!-- Facebook -->
+        <a href="https://facebook.com/velifa.io" target="_blank" rel="noopener noreferrer"
+           style="font-size: 14px; color: ${gold2}; text-decoration: none; font-weight: bold; letter-spacing: 1px;">
+          Facebook
+        </a>
+        <span style="color: ${border}; font-size: 14px;">·</span>
+        <!-- Instagram -->
+        <a href="https://instagram.com/velifa_io" target="_blank" rel="noopener noreferrer"
+           style="font-size: 14px; color: ${gold2}; text-decoration: none; font-weight: bold; letter-spacing: 1px;">
+          Instagram
+        </a>
+      </div>
+    </td>
+  </tr>
+
   <!-- ── PIED DE PAGE ────────────────────────────────────── -->
   <tr>
-    <td style="padding: 40px 0 0 0; text-align: center; border-top: 1px solid ${border};">
-      <p style="margin: 0 0 4px 0; font-size: 12px; color: ${sub};">Envoyé par VELIFA</p>
-      <p style="margin: 0; font-size: 11px; color: #555555;">© 2026 VELIFA · Performance Beyond Limits</p>
+    <td style="padding: 28px 0 0 0; text-align: center;">
+      <p style="margin: 0; font-size: 11px; color: ${dimmed};">
+        © ${year} Velifa &nbsp;·&nbsp; Performance Beyond Limits
+      </p>
+      <p style="margin: 6px 0 0 0; font-size: 10px; color: #444444;">
+        Vous recevez cet email car vous avez demandé un audit de performance.
+      </p>
     </td>
   </tr>
 
