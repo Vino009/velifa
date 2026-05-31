@@ -16,7 +16,7 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   createAnalysis: (body: {
-    url: string; email: string; cfTurnstileToken: string; locale?: string;
+    url: string; email: string; cfTurnstileToken: string; locale?: string; force?: boolean;
   }) => apiFetch<CreateAnalysisResponse>('/analyses', { method: 'POST', body: JSON.stringify(body) }),
 
   getAnalysis: (id: string) => apiFetch<{ data: Analysis }>(`/analyses/${id}`),

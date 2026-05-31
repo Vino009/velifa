@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Orbitron, Chakra_Petch, Sora } from 'next/font/google';
 import './globals.css';
 import '@/styles/velifa-design-system.css';
+import Providers from '@/components/Providers';
 import ClientLayout from '@/components/layout/ClientLayout';
 import Footer from '@/components/layout/Footer';
 
@@ -38,8 +39,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr" data-theme="dark" className={fontVariables}>
       <body className="antialiased">
-        <ClientLayout>{children}</ClientLayout>
-        <Footer />
+        <Providers>
+          <ClientLayout>{children}</ClientLayout>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

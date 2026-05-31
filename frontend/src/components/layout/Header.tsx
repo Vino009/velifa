@@ -2,18 +2,21 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Zap, Menu, X } from 'lucide-react';
+import { UserButton } from '@clerk/nextjs';
+import { useAuth } from '@clerk/nextjs';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
-const navLinks: Array<{ label: string; href: '/' |  '/fonctionnalites' | '/tarifs' | '/faq' | '/contact' }> = [
-  { label: 'Accueil', href: '/' as const },
+const navLinks: Array<{ label: string; href: '/' | '/fonctionnalites' | '/tarifs' | '/faq' | '/contact' }> = [
+  { label: 'Accueil',         href: '/' as const },
   { label: 'Fonctionnalités', href: '/fonctionnalites' as const },
-  { label: 'Tarifs',          href: '/tarifs' as const },
-  { label: 'FAQ',             href: '/faq' as const },
-  { label: 'Contact',         href: '/contact' as const }
+  { label: 'Tarifs',         href: '/tarifs' as const },
+  { label: 'FAQ',            href: '/faq' as const },
+  { label: 'Contact',        href: '/contact' as const },
 ];
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { userId } = useAuth();
 
   return (
     <header className="bg-surface border-b border-border sticky top-0 z-50">
@@ -42,13 +45,16 @@ export default function Header() {
           {/* Actions */}
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <button
-              disabled
-              className="velifa-btn velifa-btn--ghost text-xs opacity-50 cursor-not-allowed"
-              title="Connexion à venir"
-            >
-              Connexion
-            </button>
+            {userId ? (
+              <UserButton />
+            ) : (
+              <Link
+                href="/sign-in"
+                className="velifa-btn velifa-btn--ghost text-xs"
+              >
+                Connexion
+              </Link>
+            )}
           </div>
         </div>
 
@@ -86,13 +92,21 @@ export default function Header() {
                 {label}
               </Link>
             ))}
-            <div className="pt-3 border-t border-border mt-3">
-              <button
-                disabled
-                className="w-full py-3 px-2 text-sm text-text-muted opacity-50 cursor-not-allowed text-left"
-              >
-                Connexion
-              </button>
+            <div className="pt-3 border-t border-border mt-3 flex items-center justify-between">
+              {userId ? (
+                <>
+                  <span className="text-sm text-text-muted">Mon compte</span>
+                  <UserButton />
+                </>
+              ) : (
+                <Link
+                  href="/sign-in"
+                  className="block py-3 px-2 text-sm text-text-muted hover:text-accent hover:bg-surface-raised rounded-velifa-md transition"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Connexion
+                </Link>
+              )}
             </div>
           </nav>
         )}
