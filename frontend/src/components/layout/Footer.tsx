@@ -29,7 +29,7 @@ const columns: Array<{ title: string; links: Array<{ label: string; href: '/fonc
 export default function Footer() {
   return (
     <footer className="bg-bg-subtle border-t border-border">
-      <div className="max-w-6xl mx-auto px-6 pt-14 pb-8">
+      <div className="max-w-7xl mx-auto px-6 pt-14 pb-8">
         {/* Main content */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-border">
 

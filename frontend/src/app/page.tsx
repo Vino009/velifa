@@ -1,14 +1,15 @@
 'use client';
-import { useState } from 'react';
+import Image from 'next/image';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
   Loader2, Zap, BarChart2, Mail, MessageCircle, ArrowRight,
-  Shield, Clock, Globe, CheckCircle2, ArrowUpRight,
+  Shield, Clock, Globe, CheckCircle2, ArrowUpRight, ChevronLeft, ChevronRight, Camera,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 
-// ── Formulaire d'audit — logique conservée telle quelle ────────────────────────
+// ── Formulaire d'audit — LOGIQUE CONSERVÉE INTACTE ────────────────────────────
 function AuditForm() {
   const router = useRouter();
   const [url, setUrl]     = useState('');
@@ -101,59 +102,423 @@ function AuditForm() {
   );
 }
 
-// ── Page d'accueil ─────────────────────────────────────────────────────────────
+// ── Animations ────────────────────────────────────────────────────────────────
+function useScrollReveal() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return { ref, visible };
+}
+
+function RevealSection({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+  const { ref, visible } = useScrollReveal();
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-700 ${className}`}
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : 'translateY(24px)',
+        transitionDelay: `${delay}ms`,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+// ── Hero SVG Mockup ───────────────────────────────────────────────────────────
+function ReportMockup() {
+  return (
+    <div className="relative mx-auto" style={{ maxWidth: '520px' }}>
+      {/* Glow effect */}
+      <div className="absolute inset-0 rounded-velifa-xl opacity-40"
+        style={{
+          background: 'radial-gradient(ellipse at center, rgba(212,175,55,0.15) 0%, transparent 70%)',
+          filter: 'blur(20px)',
+        }} />
+
+      {/* Card frame */}
+      <div className="relative rounded-velifa-xl overflow-hidden"
+        style={{
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          boxShadow: '0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(212,175,55,0.1)',
+        }}>
+
+        {/* Browser bar */}
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-border"
+          style={{ background: 'var(--velifa-ink-900)' }}>
+          {['#FF5F57','#FFBD2E','#28C840'].map((c, i) => (
+            <div key={i} className="w-3 h-3 rounded-full" style={{ background: c }} />
+          ))}
+          <div className="flex-1 mx-4 h-5 rounded-md text-center text-xs flex items-center px-3"
+            style={{ background: 'var(--velifa-ink-800)', color: 'var(--text-subtle)' }}>
+            velifa.io/analyse/rapport
+          </div>
+        </div>
+
+        {/* Report content */}
+        <div className="p-6 space-y-5">
+          {/* Header row */}
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="w-24 h-3 rounded mb-2" style={{ background: 'var(--accent)', opacity: 0.9 }} />
+              <div className="w-16 h-2 rounded" style={{ background: 'var(--border)' }} />
+            </div>
+            {/* Score ring mini */}
+            <div className="relative w-16 h-16">
+              <svg viewBox="0 0 64 64" className="w-full h-full -rotate-90">
+                <circle cx="32" cy="32" r="26" fill="none" stroke="var(--border)" strokeWidth="6" />
+                <circle cx="32" cy="32" r="26" fill="none"
+                  stroke="var(--velifa-score-good)" strokeWidth="6"
+                  strokeDasharray="163.4" strokeDashoffset="16.3"
+                  strokeLinecap="round" />
+              </svg>
+              <span className="absolute inset-0 flex items-center justify-center font-heading font-bold text-lg"
+                style={{ color: 'var(--velifa-score-good)' }}>90</span>
+            </div>
+          </div>
+
+          {/* Score bars */}
+          {[
+            { label: 'Performance', score: 92, color: 'var(--velifa-score-good)' },
+            { label: 'Accessibilité', score: 78, color: 'var(--velifa-score-average)' },
+            { label: 'SEO', score: 95, color: 'var(--velifa-score-good)' },
+            { label: 'Bonnes pratiques', score: 88, color: 'var(--velifa-score-good)' },
+          ].map(({ label, score, color }) => (
+            <div key={label} className="space-y-1.5">
+              <div className="flex justify-between text-xs">
+                <span style={{ color: 'var(--text-subtle)' }}>{label}</span>
+                <span className="font-bold" style={{ color }}>{score}</span>
+              </div>
+              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
+                <div className="h-full rounded-full" style={{ width: `${score}%`, background: color }} />
+              </div>
+            </div>
+          ))}
+
+          {/* Divider */}
+          <div className="border-t border-border" style={{ borderStyle: 'dashed' }} />
+
+          {/* CWV row */}
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: 'LCP', value: '1.2s', good: true },
+              { label: 'CLS', value: '0.00', good: true },
+              { label: 'TBT', value: '180ms', good: true },
+            ].map(({ label, value, good }) => (
+              <div key={label} className="rounded-lg p-3 text-center"
+                style={{ background: 'var(--velifa-score-good-bg)', border: '1px solid rgba(12,206,107,0.2)' }}>
+                <div className="text-xs mb-1" style={{ color: 'var(--text-subtle)' }}>{label}</div>
+                <div className="font-heading font-bold text-sm" style={{ color: 'var(--velifa-score-good)' }}>{value}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Screenshot placeholder */}
+          <div className="rounded-lg overflow-hidden h-20" style={{ background: 'var(--velifa-ink-900)', border: '1px solid var(--border)' }}>
+            <div className="w-full h-full flex items-center justify-center">
+              <div className="text-center">
+                <div className="w-8 h-8 rounded mx-auto mb-1 opacity-40" style={{ background: 'var(--accent)' }} />
+                <div className="w-16 h-1.5 rounded mx-auto" style={{ background: 'var(--border)' }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Floating accent lines */}
+      <div className="absolute -top-4 -right-4 w-24 h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--accent))' }} />
+      <div className="absolute -top-4 -right-4 h-24 w-px" style={{ background: 'linear-gradient(180deg, transparent, var(--accent))' }} />
+      <div className="absolute -bottom-4 -left-4 w-24 h-px" style={{ background: 'linear-gradient(90deg, var(--accent), transparent)' }} />
+      <div className="absolute -bottom-4 -left-4 h-24 w-px" style={{ background: 'linear-gradient(180deg, var(--accent), transparent)' }} />
+    </div>
+  );
+}
+
+// ── Carrousel fonctionnalités ───────────────────────────────────────────────────
+const carouselSlides = [
+  {
+    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80',
+    icon: BarChart2,
+    accent: '#0CCE6B',
+    title: 'Score Lighthouse complet',
+    description: '4 dimensions analysées en profondeur : Performance, Accessibilité, SEO et Bonnes Pratiques. Chaque score est calculé par Google Lighthouse et expliqué clairement.',
+    detail: 'Score basé sur Google Lighthouse · Métriques Google PageSpeed Insights',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=800&q=80',
+    icon: Globe,
+    accent: '#D4AF37',
+    title: 'Core Web Vitals mesurés',
+    description: 'LCP, CLS, TBT et FCP — les métriques officielles de Google qui influencent directement votre classement dans les résultats de recherche.',
+    detail: 'Métriques Core Web Vitals Google · Critères de classement SEO',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&q=80',
+    icon: Mail,
+    accent: '#6478FF',
+    title: 'Rapport par email',
+    description: 'Un email HTML designé Velifa est envoyé automatiquement après chaque audit. Contenu complet, screenshot, scores et recommandations.',
+    detail: 'HTML responsive · Compatible Gmail, Outlook, Apple Mail',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
+    icon: Camera,
+    accent: '#FF6464',
+    title: 'Capture d\'écran intégrée',
+    description: 'Un aperçu visuel de votre page est inclus dans le rapport. Capture réelle via Chrome headless — pas de miniature approximative.',
+    detail: 'Capture Chrome headless · Cloudinary CDN',
+  },
+];
+
+function FeatureCarousel() {
+  const [current, setCurrent] = useState(0);
+  const total = carouselSlides.length;
+
+  function prev() { setCurrent(c => (c - 1 + total) % total); }
+  function next() { setCurrent(c => (c + 1) % total); }
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrent(c => (c + 1) % total), 6000);
+    return () => clearInterval(timer);
+  }, [total]);
+
+  const slide = carouselSlides[current];
+  const Icon = slide.icon;
+
+  return (
+    <div className="max-w-7xl mx-auto">
+      {/* Slide card with background image */}
+      <div
+        className="rounded-velifa-xl overflow-hidden relative transition-all duration-500"
+        style={{ minHeight: 400 }}
+      >
+        {/* Background image */}
+        <Image
+          src={slide.image}
+          alt={slide.title}
+          fill
+          className="object-cover"
+          sizes="(max-width: 1280px) 100vw, 1280px"
+          priority={current === 0}
+        />
+
+        {/* Dark overlay gradient */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(135deg, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.75) 60%, rgba(10,10,10,0.60) 100%)',
+          }}
+        />
+
+        {/* Content overlay */}
+        <div className="relative z-10 flex flex-col items-center justify-center text-center p-10 md:p-14"
+          style={{ minHeight: 400 }}>
+          {/* Icon */}
+          <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
+            style={{ background: `${slide.accent}20`, border: `2px solid ${slide.accent}60` }}>
+            <Icon className="w-8 h-8" style={{ color: slide.accent }} />
+          </div>
+
+          <h3 className="font-heading font-bold text-xl md:text-2xl text-text mb-4 max-w-lg">
+            {slide.title}
+          </h3>
+          <p className="text-text-muted text-base leading-relaxed mb-6 max-w-md">
+            {slide.description}
+          </p>
+          <p className="text-xs" style={{ color: `${slide.accent}90` }}>
+            {slide.detail}
+          </p>
+        </div>
+
+        {/* Navigation arrows */}
+        <button
+          onClick={prev}
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110 backdrop-blur-sm"
+          style={{ background: 'rgba(26,26,26,0.8)', border: '1px solid var(--border)' }}
+          aria-label="Slide précédent"
+        >
+          <ChevronLeft className="w-5 h-5 text-text-muted" />
+        </button>
+        <button
+          onClick={next}
+          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110 backdrop-blur-sm"
+          style={{ background: 'rgba(26,26,26,0.8)', border: '1px solid var(--border)' }}
+          aria-label="Slide suivant"
+        >
+          <ChevronRight className="w-5 h-5 text-text-muted" />
+        </button>
+      </div>
+
+      {/* Dots */}
+      <div className="flex items-center justify-center gap-2 mt-6">
+        {carouselSlides.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrent(i)}
+            className="h-2 rounded-full transition-all duration-300"
+            style={{
+              width: i === current ? 28 : 8,
+              background: i === current ? 'var(--accent)' : 'var(--border)',
+            }}
+            aria-label={`Aller à la slide ${i + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Data ─────────────────────────────────────────────────────────────────────
+const keyFeatures = [
+  { icon: BarChart2,    title: 'Score détaillé',     desc: 'Performance, SEO, Accessibilité, Best Practices et Core Web Vitals complets.' },
+  { icon: Mail,         title: 'Rapport par email',   desc: 'Rapport complet envoyé sur votre email avec un lien de résultats persistant.' },
+  { icon: MessageCircle,title: 'Accompagnement WhatsApp', desc: 'Un expert vous contacte via WhatsApp pour améliorer vos métriques rapidement.' },
+  { icon: Shield,       title: 'Données protégées',   desc: 'Aucune donnée revendue, usage limité à l\'audit.' },
+];
+
+const steps = [
+  { number: '01', title: 'Entrez l\'URL',        desc: 'Saisissez l\'adresse du site à analyser. Aucun compte requis.' },
+  { number: '02', title: 'Analyse Lighthouse',  desc: 'Velifa lance les tests mobile et desktop via Google PageSpeed Insights.' },
+  { number: '03', title: 'Rapport par email',   desc: 'Recevez un rapport complet avec scores, Core Web Vitals et recommandations.' },
+];
+
+const plansPreview = [
+  { name: 'Gratuit',  price: '0',  features: ['Audit ponctuel', '4 scores Lighthouse', 'Capture d\'écran', 'Rapport email'] },
+  { name: 'Pro',      price: '9',  features: ['Tout le Gratuit', 'Historique', 'Suivi des scores', 'Audits illimités'], badge: 'Populaire' },
+  { name: 'Business', price: '29', features: ['Tout le Pro', 'Multi-sites', 'Audits programmés', 'Export PDF + API'] },
+];
+
+// ── Hero Background Carousel ─────────────────────────────────────────────────────
+const heroImages = [
+  'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1600&q=80',   // circuits / tech abstraits
+  'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1600&q=80',   // network / data flows
+  'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1600&q=80',   // digital globe / analytics
+];
+
+function HeroBackground() {
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrent(c => (c + 1) % heroImages.length), 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+      {heroImages.map((src, i) => (
+        <div
+          key={src}
+          className="absolute inset-0 transition-opacity duration-1000"
+          style={{ opacity: i === current ? 1 : 0 }}
+        >
+          <Image
+            src={src}
+            alt=""
+            fill
+            className="object-cover"
+            sizes="100vw"
+            priority={i === 0}
+          />
+          {/* Ken Burns slow zoom */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: i === current ? 'scale(1.05)' : 'scale(1)',
+              transition: 'transform 5s ease-out',
+              transformOrigin: 'center',
+            }}
+          />
+        </div>
+      ))}
+      {/* Overlay */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: 'linear-gradient(135deg, rgba(10,10,10,0.88) 0%, rgba(10,10,10,0.70) 50%, rgba(10,10,10,0.92) 100%)',
+        }}
+      />
+      {/* Dot indicators */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+        {heroImages.map((_, i) => (
+          <div
+            key={i}
+            className="h-1.5 rounded-full transition-all duration-500"
+            style={{
+              width: i === current ? 28 : 8,
+              background: i === current ? 'var(--accent)' : 'rgba(255,255,255,0.25)',
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Page ─────────────────────────────────────────────────────────────────────
 export default function HomePage() {
-  const keyFeatures = [
-    { icon: BarChart2,    title: 'Score détaillé',           desc: 'Performance, SEO, Accessibilité, Best Practices et Core Web Vitals complets.' },
-    { icon: Mail,         title: 'Rapport par email',         desc: 'Rapport complet envoyé sur votre email avec un lien de résultats persistant.' },
-    { icon: MessageCircle,title: 'Accompagnement WhatsApp',   desc: 'Un expert vous contacte via WhatsApp pour améliorer vos métriques rapidement.' },
-    { icon: Shield,       title: 'Données protégées',         desc: 'Aucune donnée revendue, usage limité à l\'audit.' },
-  ];
-
-  const steps = [
-    { number: '01', title: 'Entrez l\'URL',       desc: 'Saisissez l\'adresse du site à analyser. Aucun compte requis.' },
-    { number: '02', title: 'Analyse Lighthouse', desc: 'Velifa lance les tests mobile et desktop via Google PageSpeed Insights.' },
-    { number: '03', title: 'Rapport par email',   desc: 'Recevez un rapport complet avec scores, Core Web Vitals et recommandations.' },
-  ];
-
-  const plansPreview = [
-    { name: 'Gratuit',  price: '0',  features: ['Audit ponctuel', '4 scores Lighthouse', 'Capture d\'écran', 'Rapport email'] },
-    { name: 'Pro',      price: '9',  features: ['Tout le Gratuit', 'Historique', 'Suivi des scores', 'Audits illimités'], badge: 'Populaire' },
-    { name: 'Business', price: '29', features: ['Tout le Pro', 'Multi-sites', 'Audits programmés', 'Export PDF + API'] },
-  ];
-
   return (
     <main className="min-h-screen bg-bg">
 
       {/* ══════════════════════════════════════════════════════════════════ */}
       {/* HERO */}
       {/* ══════════════════════════════════════════════════════════════════ */}
-      <section className="max-w-3xl mx-auto px-6 pt-16 pb-20 text-center">
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 text-sm text-accent bg-accent-soft border border-border rounded-full px-4 py-1.5 mb-8">
-          <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-          Analyse en 30 secondes · Rapport complet · 100% gratuit
+      <section className="relative overflow-hidden" style={{ minHeight: '85vh' }}>
+        {/* Animated background carousel */}
+        <HeroBackground />
+
+        {/* Content — stays fixed, does NOT scroll with images */}
+        <div className="relative z-10 max-w-7xl mx-auto px-6 pt-16 pb-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+
+            {/* Left: text + form */}
+            <div className="text-center lg:text-left">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 text-sm text-accent bg-accent-soft border border-border rounded-full px-4 py-1.5 mb-8">
+                <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                Analyse en 30 secondes · Rapport complet · 100% gratuit
+              </div>
+
+              <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-text leading-tight mb-6 tracking-tight">
+                Auditez et optimisez la<br className="hidden md:block" />
+                <span className="velifa-gold-text">performance de votre site</span>
+              </h1>
+
+              <p className="text-xl text-text-muted mb-12 leading-relaxed max-w-lg mx-auto lg:mx-0">
+                Identifiez les faiblesses de votre site en quelques secondes.
+                Des Core Web Vitals au score Lighthouse — avec un plan d&apos;amélioration actionnable.
+              </p>
+
+              {/* Formulaire inchangé */}
+              <AuditForm />
+            </div>
+
+            {/* Right: report mockup */}
+            <div className="hidden lg:flex items-center justify-center">
+              <ReportMockup />
+            </div>
+          </div>
         </div>
-
-        <h1 className="font-heading text-5xl md:text-6xl font-bold text-text leading-tight mb-6 tracking-tight">
-          Auditez et optimisez la<br className="hidden md:block" />
-          <span className="velifa-gold-text">performance de votre site</span>
-        </h1>
-
-        <p className="text-xl text-text-muted mb-14 leading-relaxed max-w-xl mx-auto">
-          Identifiez les faiblesses de votre site en quelques secondes.
-          Des Core Web Vitals au score Lighthouse — avec un plan d&apos;amélioration actionnable.
-        </p>
-
-        {/* Formulaire (inchangé — logique intacte) */}
-        <AuditForm />
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════ */}
       {/* TRUST BADGES */}
       {/* ══════════════════════════════════════════════════════════════════ */}
       <div className="border-t border-border">
-        <div className="max-w-5xl mx-auto px-6 py-8">
+        <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-text-subtle">
             {[
               { icon: Shield, text: 'Aucune donnée revendue' },
@@ -171,151 +536,187 @@ export default function HomePage() {
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════ */}
+      {/* CARROUSEL FONCTIONNALITÉS */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <RevealSection>
+          <div className="text-center mb-12">
+            <p className="velifa-eyebrow mb-4">Fonctionnalités</p>
+            <h2 className="font-heading text-3xl md:text-4xl font-bold text-text">
+              Ce que Velifa mesure pour vous
+            </h2>
+          </div>
+        </RevealSection>
+        <RevealSection delay={100}>
+          <FeatureCarousel />
+        </RevealSection>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════════ */}
       {/* FONCTIONNALITÉS CLÉS */}
       {/* ══════════════════════════════════════════════════════════════════ */}
-      <section className="max-w-5xl mx-auto px-6 py-20">
-        <div className="text-center mb-14">
-          <p className="velifa-eyebrow mb-4">Fonctionnalités</p>
-          <h2 className="font-heading text-3xl md:text-4xl font-bold text-text mb-4">
-            Un audit complet, pas à pas
-          </h2>
-          <p className="text-text-muted max-w-xl mx-auto text-base">
-            Velifa vous donne toutes les métriques nécessaires pour comprendre et améliorer la performance de votre site.
-          </p>
-        </div>
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <RevealSection>
+          <div className="text-center mb-14">
+            <p className="velifa-eyebrow mb-4">Fonctionnalités</p>
+            <h2 className="font-heading text-3xl md:text-4xl font-bold text-text mb-4">
+              Un audit complet, pas à pas
+            </h2>
+            <p className="text-text-muted max-w-xl mx-auto text-base">
+              Velifa vous donne toutes les métriques nécessaires pour comprendre et améliorer la performance de votre site.
+            </p>
+          </div>
+        </RevealSection>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {keyFeatures.map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="velifa-card">
-              <div className="w-10 h-10 rounded-velifa-md flex items-center justify-center mb-4"
-                style={{ background: 'var(--accent-soft)' }}>
-                <Icon className="w-5 h-5 text-accent" />
+          {keyFeatures.map(({ icon: Icon, title, desc }, i) => (
+            <RevealSection key={title} delay={i * 80}>
+              <div className="velifa-card hover:border-accent transition-all duration-300 hover:shadow-gold group cursor-default h-full">
+                <div className="w-10 h-10 rounded-velifa-md flex items-center justify-center mb-4 transition-colors"
+                  style={{ background: 'var(--accent-soft)' }}>
+                  <Icon className="w-5 h-5 text-accent" />
+                </div>
+                <h3 className="font-heading font-semibold text-text mb-2 group-hover:text-accent transition-colors">{title}</h3>
+                <p className="text-sm text-text-muted leading-relaxed">{desc}</p>
               </div>
-              <h3 className="font-heading font-semibold text-text mb-2">{title}</h3>
-              <p className="text-sm text-text-muted leading-relaxed">{desc}</p>
-            </div>
+            </RevealSection>
           ))}
         </div>
 
-        <div className="text-center mt-10">
-          <Link href="/fonctionnalites" className="velifa-btn velifa-btn--ghost inline-flex items-center gap-2">
-            Voir toutes les fonctionnalités
-            <ArrowUpRight className="w-4 h-4" />
-          </Link>
-        </div>
+        <RevealSection delay={200}>
+          <div className="text-center mt-10">
+            <Link href="/fonctionnalites" className="velifa-btn velifa-btn--ghost inline-flex items-center gap-2">
+              Voir toutes les fonctionnalités
+              <ArrowUpRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </RevealSection>
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════ */}
       {/* COMMENT ÇA MARCHE */}
       {/* ══════════════════════════════════════════════════════════════════ */}
       <section className="bg-bg-subtle border-y border-border">
-        <div className="max-w-5xl mx-auto px-6 py-20">
-          <div className="text-center mb-14">
-            <p className="velifa-eyebrow mb-4">Comment ça marche</p>
-            <h2 className="font-heading text-3xl md:text-4xl font-bold text-text mb-4">
-              En 3 étapes, votre rapport
-            </h2>
-          </div>
+        <div className="max-w-7xl mx-auto px-6 py-20">
+          <RevealSection>
+            <div className="text-center mb-14">
+              <p className="velifa-eyebrow mb-4">Comment ça marche</p>
+              <h2 className="font-heading text-3xl md:text-4xl font-bold text-text">
+                En 3 étapes, votre rapport
+              </h2>
+            </div>
+          </RevealSection>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
             {steps.map((step, i) => (
-              <div key={step.number} className="text-center relative">
-                {i < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-7 right-0 translate-x-1/2 z-10">
-                    <ArrowRight className="w-5 h-5 text-accent" />
+              <RevealSection key={step.number} delay={i * 100}>
+                <div className="text-center relative">
+                  {i < steps.length - 1 && (
+                    <div className="hidden md:block absolute top-7 right-0 translate-x-1/2 z-10">
+                      <ArrowRight className="w-5 h-5 text-accent" />
+                    </div>
+                  )}
+                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-full mb-5"
+                    style={{ background: 'var(--accent-soft)', border: '2px solid var(--accent)' }}>
+                    <span className="font-heading font-bold text-xl text-accent">{step.number}</span>
                   </div>
-                )}
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-full mb-5"
-                  style={{ background: 'var(--accent-soft)', border: '2px solid var(--accent)' }}>
-                  <span className="font-heading font-bold text-xl text-accent">{step.number}</span>
+                  <h3 className="font-heading font-semibold text-text text-lg mb-3">{step.title}</h3>
+                  <p className="text-text-muted text-sm leading-relaxed">{step.desc}</p>
                 </div>
-                <h3 className="font-heading font-semibold text-text text-lg mb-3">{step.title}</h3>
-                <p className="text-text-muted text-sm leading-relaxed">{step.desc}</p>
-              </div>
+              </RevealSection>
             ))}
           </div>
 
-          <div className="text-center">
-            <a href="#" className="velifa-btn inline-flex items-center gap-2">
-              Lancer un audit gratuit <ArrowRight className="w-4 h-4" />
-            </a>
-          </div>
+          <RevealSection delay={200}>
+            <div className="text-center">
+              <a href="#" className="velifa-btn inline-flex items-center gap-2">
+                Lancer un audit gratuit <ArrowRight className="w-4 h-4" />
+              </a>
+            </div>
+          </RevealSection>
         </div>
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════ */}
       {/* TARIFS APERÇU */}
       {/* ══════════════════════════════════════════════════════════════════ */}
-      <section className="max-w-5xl mx-auto px-6 py-20">
-        <div className="text-center mb-14">
-          <p className="velifa-eyebrow mb-4">Tarifs</p>
-          <h2 className="font-heading text-3xl md:text-4xl font-bold text-text mb-4">
-            Un plan pour chaque besoin
-          </h2>
-          <p className="text-text-muted max-w-xl mx-auto text-base">
-            Du premier audit gratuit au suivi avancé de vos performances.
-          </p>
-        </div>
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <RevealSection>
+          <div className="text-center mb-14">
+            <p className="velifa-eyebrow mb-4">Tarifs</p>
+            <h2 className="font-heading text-3xl md:text-4xl font-bold text-text mb-4">
+              Un plan pour chaque besoin
+            </h2>
+            <p className="text-text-muted max-w-xl mx-auto text-base">
+              Du premier audit gratuit au suivi avancé de vos performances.
+            </p>
+          </div>
+        </RevealSection>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          {plansPreview.map((plan) => (
-            <div
-              key={plan.name}
-              className={`velifa-card relative flex flex-col ${plan.badge ? 'border-accent' : ''}`}
-              style={plan.badge ? { borderWidth: '2px', boxShadow: 'var(--shadow-gold)' } : {}}
-            >
-              {plan.badge && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="inline-block px-3 py-1 rounded-full text-xs font-bold text-velifa-black"
-                    style={{ background: 'var(--velifa-gradient-gold)' }}>
-                    {plan.badge}
-                  </span>
+          {plansPreview.map((plan, i) => (
+            <RevealSection key={plan.name} delay={i * 80}>
+              <div
+                className={`velifa-card relative flex flex-col hover:border-accent transition-all duration-300 hover:shadow-gold ${plan.badge ? 'border-accent' : ''}`}
+                style={plan.badge ? { borderWidth: '2px', boxShadow: 'var(--shadow-gold)' } : {}}
+              >
+                {plan.badge && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="inline-block px-3 py-1 rounded-full text-xs font-bold text-velifa-black"
+                      style={{ background: 'var(--velifa-gradient-gold)' }}>
+                      {plan.badge}
+                    </span>
+                  </div>
+                )}
+                <div className="text-center mb-4 pt-2">
+                  <h3 className={`font-heading font-bold text-lg mb-1 ${plan.badge ? 'velifa-gold-text' : 'text-text'}`}>
+                    {plan.name}
+                  </h3>
+                  <div className="flex items-baseline justify-center gap-1">
+                    <span className="font-heading text-4xl font-bold text-text">{plan.price}</span>
+                    <span className="text-text-muted text-sm">€/mois</span>
+                  </div>
                 </div>
-              )}
-              <div className="text-center mb-4 pt-2">
-                <h3 className={`font-heading font-bold text-lg mb-1 ${plan.badge ? 'velifa-gold-text' : 'text-text'}`}>
-                  {plan.name}
-                </h3>
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="font-heading text-4xl font-bold text-text">{plan.price}</span>
-                  <span className="text-text-muted text-sm">€/mois</span>
-                </div>
+                <ul className="space-y-2 flex-1 mb-6">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 score-good flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-text-muted">{f}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <ul className="space-y-2 flex-1 mb-6">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 score-good flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-text-muted">{f}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            </RevealSection>
           ))}
         </div>
 
-        <div className="text-center">
-          <Link href="/tarifs" className="velifa-btn velifa-btn--ghost inline-flex items-center gap-2">
-            Voir les tarifs détaillés
-            <ArrowUpRight className="w-4 h-4" />
-          </Link>
-        </div>
+        <RevealSection delay={200}>
+          <div className="text-center">
+            <Link href="/tarifs" className="velifa-btn velifa-btn--ghost inline-flex items-center gap-2">
+              Voir les tarifs détaillés
+              <ArrowUpRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </RevealSection>
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════ */}
       {/* CTA FINAL */}
       {/* ══════════════════════════════════════════════════════════════════ */}
       <section className="border-t border-border">
-        <div className="max-w-3xl mx-auto px-6 py-20 text-center">
-          <h2 className="font-heading text-3xl md:text-4xl font-bold text-text mb-5">
-            Prêt à booster votre site ?
-          </h2>
-          <p className="text-text-muted mb-10 text-base">
-            Lancez votre premier audit gratuit — moins de 30 secondes pour connaître vos scores.
-          </p>
-          <a href="#" className="velifa-btn inline-flex items-center gap-2">
-            Analyser mon site maintenant
-            <ArrowRight className="w-4 h-4" />
-          </a>
+        <div className="max-w-7xl mx-auto px-6 py-20 text-center">
+          <RevealSection>
+            <h2 className="font-heading text-3xl md:text-4xl font-bold text-text mb-5">
+              Prêt à booster votre site ?
+            </h2>
+            <p className="text-text-muted mb-10 text-base">
+              Lancez votre premier audit gratuit — moins de 30 secondes pour connaître vos scores.
+            </p>
+            <a href="#" className="velifa-btn inline-flex items-center gap-2">
+              Analyser mon site maintenant
+              <ArrowRight className="w-4 h-4" />
+            </a>
+          </RevealSection>
         </div>
       </section>
 

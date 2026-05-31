@@ -4,10 +4,12 @@ import Link from 'next/link';
 import { Zap, Menu, X } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
-const navLinks: Array<{ label: string; href: '/fonctionnalites' | '/tarifs' | '/faq' }> = [
+const navLinks: Array<{ label: string; href: '/' |  '/fonctionnalites' | '/tarifs' | '/faq' | '/contact' }> = [
+  { label: 'Accueil', href: '/' as const },
   { label: 'Fonctionnalités', href: '/fonctionnalites' as const },
   { label: 'Tarifs',          href: '/tarifs' as const },
   { label: 'FAQ',             href: '/faq' as const },
+  { label: 'Contact',         href: '/contact' as const }
 ];
 
 export default function Header() {
@@ -15,7 +17,7 @@ export default function Header() {
 
   return (
     <header className="bg-surface border-b border-border sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-6 py-4">
+      <div className="max-w-7xl mx-auto px-6 py-4">
         {/* Desktop layout */}
         <div className="hidden md:flex items-center justify-between">
           {/* Wordmark */}
