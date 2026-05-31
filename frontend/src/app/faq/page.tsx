@@ -6,7 +6,7 @@ import { Zap, ChevronDown, MessageCircle } from 'lucide-react';
 const faqs = [
   {
     question: 'Qu\'est-ce que Velifa ?',
-    answer: 'Un outil d\'audit de performance web qui analyse votre site et vous donne des scores et recommandations basés sur Google PageSpeed Insights.',
+    answer: 'Un outil d\'audit de performance web qui analyse votre site et vous donne des scores et recommandations détaillés.',
   },
   {
     question: 'L\'audit est-il gratuit ?',
@@ -14,7 +14,7 @@ const faqs = [
   },
   {
     question: 'Comment fonctionne l\'analyse ?',
-    answer: 'Vous entrez l\'URL de votre site, Velifa lance une analyse Lighthouse (mobile et desktop) et vous renvoie les scores, les Core Web Vitals et une capture d\'écran.',
+    answer: 'Vous entrez l\'URL de votre site, Velifa lance une analyse complète (mobile et desktop) et vous renvoie les scores, les Core Web Vitals et une capture d\'écran.',
   },
   {
     question: 'Que mesure Velifa ?',
@@ -131,7 +131,7 @@ export default function FAQPage() {
       {/* ── Footer note ───────────────────────────────────────────────────── */}
       <div className="max-w-3xl mx-auto px-6 pb-16 text-center">
         <p className="text-text-subtle text-xs">
-          Velifa utilise Google PageSpeed Insights pour les audits. Les scores reflètent la méthodologie Lighthouse.
+          Velifa effectue les audits de performance. Les scores sont calculés selon une méthodologie reconnue.
         </p>
       </div>
     </main>

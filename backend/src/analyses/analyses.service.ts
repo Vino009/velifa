@@ -37,7 +37,7 @@ export class AnalysesService {
     const urlHash = hashUrl(normalizedUrl);
 
     const cutoff = new Date(Date.now() - CACHE_TTL_HOURS * 3600 * 1000);
-    const cached = await this.db.findCachedAnalysis(urlHash, cutoff);
+    const cached = dto.force ? null : await this.db.findCachedAnalysis(urlHash, cutoff);
     if (cached) {
       this.logger.log(`Cache hit for ${normalizedUrl} → ${cached.id}`);
       return cached;

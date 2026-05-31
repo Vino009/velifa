@@ -7,7 +7,7 @@ import Link from 'next/link';
 
 const STEPS = [
   { icon: Globe,    label: 'Accès au site en cours...' },
-  { icon: BarChart2, label: 'Analyse PageSpeed (mobile + desktop)...' },
+  { icon: BarChart2, label: 'Analyse de la performance (mobile + desktop)...' },
   { icon: BarChart2, label: 'Calcul des Core Web Vitals...' },
   { icon: Mail,      label: 'Génération du rapport...' },
 ];

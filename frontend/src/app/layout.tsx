@@ -29,7 +29,7 @@ const sora = Sora({
 export const metadata: Metadata = {
   title: 'VELIFA — Audit de Performance Web',
   description: 'Analysez la performance de votre site e-commerce en 30 secondes. Score, Core Web Vitals, rapport détaillé.',
-  keywords: ['audit performance', 'PageSpeed', 'Core Web Vitals', 'SEO', 'e-commerce'],
+  keywords: ['audit performance', 'Velifa', 'Core Web Vitals', 'SEO', 'e-commerce'],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

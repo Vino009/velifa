@@ -28,7 +28,7 @@ const values = [
   {
     icon: Eye,
     title: 'Transparence',
-    description: 'Les audits sont réalisés via Google PageSpeed Insights — un outil reconnu. Les résultats sont reproductibles et vérifiables.',
+    description: 'Les audits sont réalisés via une technologie reconnue. Les résultats sont reproductibles et vérifiables.',
   },
   {
     icon: Target,
@@ -142,7 +142,7 @@ export default function AProposPage() {
       {/* ── Footer note ───────────────────────────────────────────────────── */}
       <div className="max-w-5xl mx-auto px-6 pb-16 text-center">
         <p className="text-text-subtle text-xs">
-          Velifa utilise Google PageSpeed Insights pour les audits. Les scores reflètent la méthodologie Lighthouse.
+          Velifa effectue les audits de performance. Les scores sont calculés selon une méthodologie reconnue.
         </p>
       </div>
     </main>

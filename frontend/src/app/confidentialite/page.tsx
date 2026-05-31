@@ -23,7 +23,7 @@ const sections = [
         <ul className="space-y-2 list-disc list-inside">
           <li><strong>Adresse email</strong> — fournie par l&apos;utilisateur lors de la soumission d&apos;un audit, pour recevoir le rapport de performance.</li>
           <li><strong>URL analysée</strong> — l&apos;adresse du site web soumis à l&apos;audit.</li>
-          <li><strong>Données d&apos;audit</strong> — scores de performance, Core Web Vitals, captures d&apos;écran et recommandations générées par Google PageSpeed Insights.</li>
+          <li><strong>Données d&apos;audit</strong> — scores de performance, Core Web Vitals, captures d&apos;écran et recommandations générées par Velifa.</li>
           <li><strong>Données de navigation</strong> —有限的 logs techniques (adresse IP, user-agent, timestamps) utilisés uniquement pour le fonctionnement du service.</li>
         </ul>
       </>
@@ -71,7 +71,7 @@ const sections = [
         <p className="mb-4">Velifa fait appel aux services tiers suivants :</p>
         <ul className="space-y-3 list-disc list-inside">
           <li>
-            <strong>Google PageSpeed Insights</strong> — utilisé pour effectuer les audits Lighthouse.
+            <strong>Velifa</strong> — utilisé pour effectuer les audits de performance.
             <span className="text-text-subtle text-xs block mt-1 ml-4">Politique de confidentialité Google : <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="text-accent hover:text-accent-hover underline">https://policies.google.com/privacy</a></span>
           </li>
           <li>

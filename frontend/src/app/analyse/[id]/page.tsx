@@ -102,7 +102,7 @@ export default async function ReportPage({ params }: { params: { id: string } })
                 </span>
               </div>
               <p className="text-text-muted mb-4 text-sm leading-relaxed">
-                Votre site obtient un score de <strong className="text-text">{score}/100</strong> sur mobile selon Google Lighthouse.
+                Votre site obtient un score de <strong className="text-text">{score}/100</strong> sur mobile selon Velifa.
                 {score < 50 && ' Des améliorations urgentes sont nécessaires.'}
                 {score >= 50 && score < 90 && ' Plusieurs optimisations peuvent améliorer votre expérience utilisateur.'}
                 {score >= 90 && ' Excellent travail ! Votre site est très performant.'}
@@ -164,7 +164,7 @@ export default async function ReportPage({ params }: { params: { id: string } })
 
         {/* ── Lighthouse scores ────────────────────────────────────────── */}
         <div className="velifa-card">
-          <h2 className="font-heading font-semibold text-text mb-5">Scores Lighthouse</h2>
+          <h2 className="font-heading font-semibold text-text mb-5">Scores de performance</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {lighthouseScores.map(({ label, score: s }) => (
               <div key={label} className="text-center p-4 rounded-velifa-lg" style={{ background: 'var(--surface-raised)' }}>

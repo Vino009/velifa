@@ -18,6 +18,9 @@ build/
 *.stackdump
 tmp/
 
+# TypeScript
+*.tsbuildinfo
+
 # OS
 .DS_Store
 Thumbs.db

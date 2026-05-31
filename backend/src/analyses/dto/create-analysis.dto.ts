@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, IsUrl, MaxLength } from 'class-validator';
+import { IsBoolean, IsEmail, IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class CreateAnalysisDto {
@@ -22,4 +22,8 @@ export class CreateAnalysisDto {
 
   @IsString()
   locale?: string = 'fr';
+
+  @IsOptional()
+  @IsBoolean()
+  force?: boolean = false;
 }

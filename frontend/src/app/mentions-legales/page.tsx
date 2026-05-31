@@ -61,7 +61,7 @@ const sections = [
     content: (
       <p>
         Les icônes utilisées sur le site sont fournies par <strong>Lucide</strong> (licence ISC).
-        Les audits de performance sont réalisés via <strong>Google PageSpeed Insights</strong>.
+        Les audits de performance sont réalisés via <strong>Velifa</strong>.
       </p>
     ),
   },

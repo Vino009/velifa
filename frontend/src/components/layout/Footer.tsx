@@ -87,14 +87,7 @@ export default function Footer() {
           </p>
           <p className="text-text-subtle text-xs">
             Propulsé par{' '}
-            <a
-              href="https://pagespeed.web.dev/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-accent hover:text-accent-hover"
-            >
-              Google PageSpeed Insights
-            </a>
+            <span className="text-accent">Velifa</span>
           </p>
         </div>
       </div>

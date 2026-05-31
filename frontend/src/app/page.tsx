@@ -5,29 +5,32 @@ import Link from 'next/link';
 import {
   Loader2, Zap, BarChart2, Mail, MessageCircle, ArrowRight,
   Shield, Clock, Globe, CheckCircle2, ArrowUpRight, ChevronLeft, ChevronRight, Camera,
+  RefreshCw, Eye, X,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 
-// ── Formulaire d'audit — LOGIQUE CONSERVÉE INTACTE ────────────────────────────
+// ── Formulaire d'audit ───────────────────────────────────────────────────────
 function AuditForm() {
   const router = useRouter();
   const [url, setUrl]     = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState('');
+  const [cachedInfo, setCachedInfo] = useState<{ id: string } | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent, force = false) {
     e.preventDefault();
     setError('');
+    setCachedInfo(null);
     setLoading(true);
     try {
       const res = await api.createAnalysis({
-        url, email, cfTurnstileToken: 'dev-bypass', locale: 'fr',
+        url, email, cfTurnstileToken: 'dev-bypass', locale: 'fr', force,
       });
       const { id, cached } = res.data;
       if (cached) {
-        router.push(`/analyse/${id}`);
+        setCachedInfo({ id });
       } else {
         router.push(`/analyse/loading-page?id=${id}`);
       }
@@ -38,12 +41,65 @@ function AuditForm() {
     }
   }
 
+  function handleDismiss() {
+    setCachedInfo(null);
+    setUrl('');
+    setEmail('');
+  }
+
   return (
     <form
       onSubmit={handleSubmit}
       className="velifa-card text-left space-y-4"
       style={{ background: 'var(--surface)', maxWidth: '600px', margin: '0 auto' }}
     >
+      {cachedInfo && (
+        <div
+          className="rounded-velifa-lg border p-5 space-y-4"
+          style={{ background: 'var(--velifa-ink-900)', borderColor: 'var(--accent)' }}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <Clock className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-text">
+                  Ce site a déjà été analysé récemment
+                </p>
+                <p className="text-xs text-text-muted mt-0.5">
+                  Un rapport existe déjà (moins de 24h). Que souhaitez-vous faire ?
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleDismiss}
+              className="text-text-subtle hover:text-text transition p-1"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              type="button"
+              onClick={() => router.push(`/analyse/${cachedInfo.id}`)}
+              className="velifa-btn flex-1 flex items-center justify-center gap-2"
+            >
+              <Eye className="w-4 h-4" />
+              Voir le rapport existant
+            </button>
+            <button
+              type="button"
+              onClick={(e) => handleSubmit(e as unknown as React.FormEvent, true)}
+              disabled={loading}
+              className="velifa-btn velifa-btn--ghost flex-1 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              Relancer une analyse
+            </button>
+          </div>
+        </div>
+      )}
+
       <div>
         <label className="block text-sm font-medium text-text mb-1.5">
           URL de votre site
@@ -254,9 +310,9 @@ const carouselSlides = [
     image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80',
     icon: BarChart2,
     accent: '#0CCE6B',
-    title: 'Score Lighthouse complet',
-    description: '4 dimensions analysées en profondeur : Performance, Accessibilité, SEO et Bonnes Pratiques. Chaque score est calculé par Google Lighthouse et expliqué clairement.',
-    detail: 'Score basé sur Google Lighthouse · Métriques Google PageSpeed Insights',
+    title: 'Score de performance complet',
+    description: '4 dimensions analysées en profondeur : Performance, Accessibilité, SEO et Bonnes Pratiques. Chaque score est calculé par Velifa et expliqué clairement.',
+    detail: 'Score Velifa · Métriques Core Web Vitals',
   },
   {
     image: 'https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=800&q=80',
@@ -392,12 +448,12 @@ const keyFeatures = [
 
 const steps = [
   { number: '01', title: 'Entrez l\'URL',        desc: 'Saisissez l\'adresse du site à analyser. Aucun compte requis.' },
-  { number: '02', title: 'Analyse Lighthouse',  desc: 'Velifa lance les tests mobile et desktop via Google PageSpeed Insights.' },
+  { number: '02', title: 'Analyse Velifa',  desc: 'Velifa lance les tests mobile et desktop pour mesurer la performance de votre site.' },
   { number: '03', title: 'Rapport par email',   desc: 'Recevez un rapport complet avec scores, Core Web Vitals et recommandations.' },
 ];
 
 const plansPreview = [
-  { name: 'Gratuit',  price: '0',  features: ['Audit ponctuel', '4 scores Lighthouse', 'Capture d\'écran', 'Rapport email'] },
+  { name: 'Gratuit',  price: '0',  features: ['Audit ponctuel', '4 scores de performance', 'Capture d\'écran', 'Rapport email'] },
   { name: 'Pro',      price: '9',  features: ['Tout le Gratuit', 'Historique', 'Suivi des scores', 'Audits illimités'], badge: 'Populaire' },
   { name: 'Business', price: '29', features: ['Tout le Pro', 'Multi-sites', 'Audits programmés', 'Export PDF + API'] },
 ];
@@ -499,7 +555,7 @@ export default function HomePage() {
 
               <p className="text-xl text-text-muted mb-12 leading-relaxed max-w-lg mx-auto lg:mx-0">
                 Identifiez les faiblesses de votre site en quelques secondes.
-                Des Core Web Vitals au score Lighthouse — avec un plan d&apos;amélioration actionnable.
+                Des Core Web Vitals aux scores de performance — avec un plan d&apos;amélioration actionnable.
               </p>
 
               {/* Formulaire inchangé */}
@@ -523,7 +579,7 @@ export default function HomePage() {
             {[
               { icon: Shield, text: 'Aucune donnée revendue' },
               { icon: Clock,  text: 'Résultat en moins de 30s' },
-              { icon: Zap,    text: 'Propulsé par Google PageSpeed' },
+              { icon: Zap,    text: 'Propulsé par Velifa' },
               { icon: Globe,  text: 'Compatible tout site public' },
             ].map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-2">

@@ -8,8 +8,8 @@ import {
 const features = [
   {
     icon: BarChart2,
-    title: 'Audit Lighthouse complet',
-    description: '4 scores clés — Performance, Accessibilité, SEO, Bonnes pratiques — calculés via Google PageSpeed Insights.',
+    title: 'Audit de performance complet',
+    description: '4 scores clés — Performance, Accessibilité, SEO, Bonnes pratiques — calculés par Velifa.',
     plan: null,
   },
   {
@@ -71,7 +71,7 @@ const steps = [
   {
     number: '02',
     title: 'Velifa analyse',
-    description: 'En quelques secondes, Velifa collecte les données via Google PageSpeed Insights et génère votre rapport complet.',
+    description: 'En quelques secondes, Velifa collecte les données et génère votre rapport complet.',
   },
   {
     number: '03',
@@ -195,7 +195,7 @@ export default function FonctionnalitesPage() {
       {/* ── Footer note ───────────────────────────────────────────────────── */}
       <div className="max-w-5xl mx-auto px-6 pb-16 text-center">
         <p className="text-text-subtle text-xs">
-          Velifa repose sur Google PageSpeed Insights pour les audits. Les scores reflètent la méthodologie Lighthouse.
+          Velifa effectue les audits de performance. Les scores sont calculés selon une méthodologie reconnue.
         </p>
       </div>
     </main>

@@ -97,7 +97,7 @@ export default function ContactPage() {
       {/* ── Footer note ───────────────────────────────────────────────────── */}
       <div className="max-w-2xl mx-auto px-6 pb-16 text-center">
         <p className="text-text-subtle text-xs">
-          Velifa utilise Google PageSpeed Insights pour les audits.
+          Velifa effectue les audits de performance.
         </p>
       </div>
     </main>

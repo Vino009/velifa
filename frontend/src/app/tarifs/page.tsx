@@ -14,7 +14,7 @@ const plans = [
     featured: false,
     features: [
       'Audit ponctuel d\'une URL',
-      '4 scores Lighthouse + Core Web Vitals',
+      '4 scores de performance + Core Web Vitals',
       'Capture d\'écran du site',
       'Rapport envoyé par email',
     ],
@@ -156,7 +156,7 @@ export default function TarifsPage() {
 
       <div className="max-w-5xl mx-auto px-6 pb-16 text-center">
         <p className="text-text-subtle text-sm">
-          Velifa utilise Google PageSpeed Insights pour les audits. Les scores sont calculés selon la méthodologie Lighthouse.
+          Velifa effectue les audits de performance. Les scores sont calculés selon une méthodologie reconnue.
         </p>
       </div>
     </main>
