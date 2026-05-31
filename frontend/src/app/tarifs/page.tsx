@@ -61,16 +61,7 @@ const plans = [
 export default function TarifsPage() {
   return (
     <main className="min-h-screen bg-bg">
-      {/* ── Header ──────────────────────────────────────────────────────── */}
-      <header className="bg-surface border-b border-border">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center gap-3">
-          <Zap className="w-5 h-5 text-accent" />
-          <Link href="/" className="velifa-wordmark text-sm">VELIFA</Link>
-          <span className="text-muted text-xs">·</span>
-          <span className="text-sm text-text-muted">Tarifs</span>
-        </div>
-      </header>
-
+     
       {/* ── Hero ────────────────────────────────────────────────────────── */}
       <section className="max-w-5xl mx-auto px-6 pt-16 pb-12 text-center">
         <p className="velifa-eyebrow mb-4">Tarifs</p>

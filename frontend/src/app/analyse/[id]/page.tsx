@@ -49,7 +49,7 @@ export default async function ReportPage({ params }: { params: { id: string } })
   return (
     <main className="min-h-screen bg-bg">
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <header className="bg-surface border-b border-border sticky top-0 z-10">
+      <header className=" border-b border-border sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Zap className="w-5 h-5 text-accent" />
