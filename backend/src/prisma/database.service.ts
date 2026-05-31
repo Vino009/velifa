@@ -32,6 +32,7 @@ export interface Analysis {
   reportUrl: string | null;
   locale: string;
   source: string;
+  clerkUserId: string | null;  // Clerk user ID when authenticated (NULL for anonymous audits)
   ipAddress: string | null;
   userAgent: string | null;
   deletedAt: Date | null;
@@ -108,6 +109,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       reportUrl:           row.report_url,
       locale:              row.locale,
       source:              row.source,
+      clerkUserId:         row.clerk_user_id ?? null,
       ipAddress:           row.ip_address,
       userAgent:           row.user_agent,
       deletedAt:           row.deleted_at,
@@ -134,13 +136,14 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     email: string;
     locale: string;
     source: string;
+    clerkUserId?: string | null;
     ipAddress: string | null;
   }): Promise<Analysis> {
     const id = this.generateId();
     await this.pool.query(
-      `INSERT INTO analyses (id, url_site, url_hash, email_client, status, locale, source, ip_address, created_at, updated_at)
-       VALUES (?, ?, ?, ?, 'pending', ?, ?, ?, NOW(), NOW())`,
-      [id, data.urlSite, data.urlHash, data.email, data.locale, data.source, data.ipAddress],
+      `INSERT INTO analyses (id, url_site, url_hash, email_client, status, locale, source, clerk_user_id, ip_address, created_at, updated_at)
+       VALUES (?, ?, ?, ?, 'pending', ?, ?, ?, ?, NOW(), NOW())`,
+      [id, data.urlSite, data.urlHash, data.email, data.locale, data.source, data.clerkUserId ?? null, data.ipAddress],
     );
     const [rows] = await this.pool.query<mysql.RowDataPacket[]>(
       'SELECT * FROM analyses WHERE id = ?',
@@ -173,7 +176,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       unusedResources: 'unused_resources', reportJson: 'report_json',
       screenshotUrl: 'screenshot_url', cloudinaryPublicId: 'cloudinary_public_id',
       whatsappLink: 'whatsapp_link', reportUrl: 'report_url',
-      locale: 'locale', source: 'source', ipAddress: 'ip_address',
+      locale: 'locale', source: 'source', clerkUserId: 'clerk_user_id', ipAddress: 'ip_address',
       userAgent: 'user_agent', deletedAt: 'deleted_at', anonymizedAt: 'anonymized_at',
       errorMessage: 'error_message',
       completedAt: 'completed_at', failedAt: 'failed_at',
