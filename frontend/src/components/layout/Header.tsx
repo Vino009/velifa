@@ -22,15 +22,15 @@ export default function Header() {
     <header className="bg-surface border-b border-border sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 py-4">
         {/* Desktop layout */}
-        <div className="hidden md:flex items-center justify-between">
+        <div className="hidden md:flex items-center gap-8">
           {/* Wordmark */}
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
             <Zap className="w-5 h-5 text-accent" />
             <span className="velifa-wordmark text-sm">VELIFA</span>
           </Link>
 
-          {/* Nav links */}
-          <nav className="flex items-center gap-8">
+          {/* Nav links — takes the middle space, centers its own content */}
+          <nav className="flex-1 flex items-center justify-center gap-8">
             {navLinks.map(({ label, href }) => (
               <Link
                 key={label}
@@ -43,10 +43,18 @@ export default function Header() {
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-shrink-0">
             <ThemeToggle />
             {userId ? (
-              <UserButton />
+              <>
+                <Link
+                  href="/dashboard"
+                  className="text-sm text-text-muted hover:text-accent transition-colors whitespace-nowrap"
+                >
+                  Mon espace
+                </Link>
+                <UserButton />
+              </>
             ) : (
               <Link
                 href="/sign-in"
@@ -95,7 +103,16 @@ export default function Header() {
             <div className="pt-3 border-t border-border mt-3 flex items-center justify-between">
               {userId ? (
                 <>
-                  <span className="text-sm text-text-muted">Mon compte</span>
+                  <div className="flex flex-col gap-1">
+                    <Link
+                      href="/dashboard"
+                      className="block py-3 px-2 text-sm text-text-muted hover:text-accent hover:bg-surface-raised rounded-velifa-md transition"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Mon espace
+                    </Link>
+                    <span className="px-2 text-xs text-text-subtle">Mon compte</span>
+                  </div>
                   <UserButton />
                 </>
               ) : (

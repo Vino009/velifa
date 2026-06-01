@@ -41,6 +41,18 @@ export interface CreateAnalysisResponse {
   timestamp: string;
 }
 
+export interface MyAudit {
+  id: string;
+  url: string;
+  status: AnalysisStatus;
+  scorePerformance: number | null;
+  scoreAccessibility: number | null;
+  scoreSeo: number | null;
+  scoreBestPractices: number | null;
+  createdAt: string;
+  completedAt: string | null;
+}
+
 export interface SseEvent {
   status: AnalysisStatus;
   analysisId: string;

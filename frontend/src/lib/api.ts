@@ -1,9 +1,9 @@
-import type { Analysis, CreateAnalysisResponse } from '@/types/analysis';
+import type { Analysis, CreateAnalysisResponse, MyAudit } from '@/types/analysis';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
 
 interface ApiFetchOptions extends RequestInit {
-  authToken?: string;
+  authToken?: string | null;
 }
 
 async function apiFetch<T>(path: string, options?: ApiFetchOptions): Promise<T> {
@@ -26,7 +26,7 @@ async function apiFetch<T>(path: string, options?: ApiFetchOptions): Promise<T> 
 export const api = {
   createAnalysis: (body: {
     url: string; email: string; cfTurnstileToken: string; locale?: string; force?: boolean;
-  }, authToken?: string) =>
+  }, authToken?: string | null) =>
     apiFetch<CreateAnalysisResponse>('/analyses', {
       method: 'POST',
       body: JSON.stringify(body),
@@ -34,4 +34,7 @@ export const api = {
     }),
 
   getAnalysis: (id: string) => apiFetch<{ data: Analysis }>(`/analyses/${id}`),
+
+  getMine: (authToken: string) =>
+    apiFetch<{ data: MyAudit[]; timestamp: string }>('/analyses/mine', { authToken }),
 };

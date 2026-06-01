@@ -207,6 +207,14 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     );
   }
 
+  async findAnalysesByUser(clerkUserId: string): Promise<Analysis[]> {
+    const [rows] = await this.pool.query<mysql.RowDataPacket[]>(
+      `SELECT * FROM analyses WHERE clerk_user_id = ? AND deleted_at IS NULL ORDER BY created_at DESC`,
+      [clerkUserId],
+    );
+    return rows.map((row) => this.rowToAnalysis(row));
+  }
+
   async findCachedAnalysis(urlHash: string, cutoff: Date): Promise<Analysis | null> {
     const [rows] = await this.pool.query<mysql.RowDataPacket[]>(
       `SELECT * FROM analyses WHERE url_hash = ? AND status = 'completed' AND created_at >= ? AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 1`,

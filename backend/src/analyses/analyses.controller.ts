@@ -11,6 +11,7 @@ import {
   HttpStatus,
   Logger,
   Headers,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { Observable, map } from 'rxjs';
@@ -48,6 +49,20 @@ export class AnalysesController {
       status: analysis.status,
       cached: analysis.status === 'completed',
     };
+  }
+
+  /**
+   * GET /analyses/mine
+   * Returns all audits for the authenticated Clerk user, newest first.
+   * Requires a valid Clerk Bearer token (401 otherwise).
+   */
+  @Get('mine')
+  async findMine(@Headers('authorization') authHeader: string | undefined) {
+    const clerkUserId = await verifyClerkToken(authHeader);
+    if (!clerkUserId) {
+      throw new UnauthorizedException('Valid Clerk token required');
+    }
+    return this.analysesService.findByUser(clerkUserId);
   }
 
   /**

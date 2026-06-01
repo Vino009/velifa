@@ -71,6 +71,21 @@ export class AnalysesService {
     return analysis;
   }
 
+  async findByUser(clerkUserId: string) {
+    const rows = await this.db.findAnalysesByUser(clerkUserId);
+    return rows.map((a) => ({
+      id:                 a.id,
+      url:                a.urlSite,
+      status:             a.status,
+      scorePerformance:   a.scorePerformance,
+      scoreAccessibility: a.scoreAccessibility,
+      scoreSeo:           a.scoreSeo,
+      scoreBestPractices: a.scoreBestPractices,
+      createdAt:          a.createdAt,
+      completedAt:        a.completedAt,
+    }));
+  }
+
   private async verifyCaptcha(token: string, ip: string): Promise<void> {
     const secretKey = this.config.get<string>('security.turnstileSecretKey', '');
     if (
