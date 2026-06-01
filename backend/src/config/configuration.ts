@@ -30,6 +30,7 @@ class EnvironmentVariables {
   @IsString() WHATSAPP_NUMBER: string = '';
   @IsString() TURNSTILE_SECRET_KEY: string = '';
   @IsString() JWT_SECRET: string = '';
+  @IsOptional() @IsString() CLERK_SECRET_KEY?: string;
   @IsOptional() @IsString() SENTRY_DSN?: string;
 }
 
@@ -70,6 +71,9 @@ export default () => ({
   security: {
     turnstileSecretKey: process.env.TURNSTILE_SECRET_KEY ?? '',
     jwtSecret:          process.env.JWT_SECRET ?? '',
+  },
+  clerk: {
+    secretKey: process.env.CLERK_SECRET_KEY ?? '',
   },
   sentry: { dsn: process.env.SENTRY_DSN ?? '' },
 });

@@ -9,10 +9,12 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import { useAuth } from '@clerk/nextjs';
 
 // ── Formulaire d'audit ───────────────────────────────────────────────────────
 function AuditForm() {
   const router = useRouter();
+  const { getToken, isSignedIn } = useAuth();
   const [url, setUrl]     = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,9 +27,10 @@ function AuditForm() {
     setCachedInfo(null);
     setLoading(true);
     try {
+      const authToken = isSignedIn ? await getToken() : undefined;
       const res = await api.createAnalysis({
         url, email, cfTurnstileToken: 'dev-bypass', locale: 'fr', force,
-      });
+      }, authToken);
       const { id, cached } = res.data;
       if (cached) {
         setCachedInfo({ id });

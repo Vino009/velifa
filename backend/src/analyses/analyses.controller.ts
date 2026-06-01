@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpStatus,
   Logger,
+  Headers,
 } from '@nestjs/common';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { Observable, map } from 'rxjs';
@@ -17,6 +18,7 @@ import { AnalysesService } from './analyses.service';
 import { SseService } from '../sse/sse.service';
 import { CreateAnalysisDto } from './dto/create-analysis.dto';
 import { ClientIp } from '../common/decorators/client-ip.decorator';
+import { verifyClerkToken } from '../common/auth/clerk-auth.service';
 
 @Controller('analyses')
 @UseGuards(ThrottlerGuard)
@@ -37,8 +39,10 @@ export class AnalysesController {
   async create(
     @Body() dto: CreateAnalysisDto,
     @ClientIp() ip: string,
+    @Headers('authorization') authHeader: string | undefined,
   ) {
-    const analysis = await this.analysesService.create(dto, ip);
+    const clerkUserId = await verifyClerkToken(authHeader);
+    const analysis = await this.analysesService.create(dto, ip, clerkUserId);
     return {
       id:     analysis.id,
       status: analysis.status,

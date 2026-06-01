@@ -26,7 +26,7 @@ export class AnalysesService {
     private readonly config: ConfigService,
   ) {}
 
-  async create(dto: CreateAnalysisDto, ipAddress: string) {
+  async create(dto: CreateAnalysisDto, ipAddress: string, clerkUserId: string | null = null) {
     await this.verifyCaptcha(dto.cfTurnstileToken, ipAddress);
 
     const validation = validateUrl(dto.url);
@@ -44,12 +44,13 @@ export class AnalysesService {
     }
 
     const analysis = await this.db.createAnalysis({
-      urlSite:    normalizedUrl,
+      urlSite:     normalizedUrl,
       urlHash,
-      email:      dto.email,
-      locale:     dto.locale ?? 'fr',
-      source:     'web',
-      ipAddress:  this.maskIp(ipAddress),
+      email:       dto.email,
+      locale:      dto.locale ?? 'fr',
+      source:      'web',
+      clerkUserId: clerkUserId,
+      ipAddress:   this.maskIp(ipAddress),
     });
 
     await this.queue.add(
