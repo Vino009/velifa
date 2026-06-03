@@ -62,6 +62,28 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       keepAliveInitialDelay: 0,
     });
     this.logger.log('Database connection pool initialized');
+    await this.runMigrations();
+  }
+
+  /** Non-destructive migrations run at startup */
+  private async runMigrations(): Promise<void> {
+    try {
+      await this.pool.query(`
+        CREATE TABLE IF NOT EXISTS users (
+          id                   VARCHAR(36)  NOT NULL DEFAULT (UUID()),
+          clerk_user_id        VARCHAR(255) NOT NULL,
+          subscription_plan    VARCHAR(20)  NULL,
+          subscription_status  VARCHAR(20)  NULL,
+          lemon_subscription_id VARCHAR(100) NULL,
+          updated_at           DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          PRIMARY KEY (id),
+          UNIQUE KEY uq_clerk_user_id (clerk_user_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+      `);
+      this.logger.log('Migration: users table ready');
+    } catch (err: any) {
+      this.logger.error('Migration failed', err?.message);
+    }
   }
 
   async onModuleDestroy(): Promise<void> {
@@ -222,6 +244,48 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     );
     return rows[0] ? this.rowToAnalysis(rows[0]) : null;
   }
+
+  // ── Users / subscriptions ──────────────────────────────────────────────
+
+  async upsertUser(data: {
+    clerkUserId: string;
+    subscriptionPlan: 'pro' | 'business' | null;
+    subscriptionStatus: string;
+    lemonSubscriptionId: string;
+  }): Promise<void> {
+    await this.pool.query(
+      `INSERT INTO users (id, clerk_user_id, subscription_plan, subscription_status, lemon_subscription_id)
+       VALUES (UUID(), ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+         subscription_plan    = VALUES(subscription_plan),
+         subscription_status  = VALUES(subscription_status),
+         lemon_subscription_id = VALUES(lemon_subscription_id),
+         updated_at           = NOW()`,
+      [
+        data.clerkUserId,
+        data.subscriptionPlan,
+        data.subscriptionStatus,
+        data.lemonSubscriptionId,
+      ],
+    );
+  }
+
+  async findUserByClerkId(clerkUserId: string): Promise<{
+    subscriptionPlan: string | null;
+    subscriptionStatus: string | null;
+  } | null> {
+    const [rows] = await this.pool.query<mysql.RowDataPacket[]>(
+      `SELECT subscription_plan, subscription_status FROM users WHERE clerk_user_id = ? LIMIT 1`,
+      [clerkUserId],
+    );
+    if (!rows[0]) return null;
+    return {
+      subscriptionPlan:   rows[0].subscription_plan   ?? null,
+      subscriptionStatus: rows[0].subscription_status ?? null,
+    };
+  }
+
+  // ── Internal helpers ───────────────────────────────────────────────────
 
   private generateId(): string {
     const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';

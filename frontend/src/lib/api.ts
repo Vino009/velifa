@@ -37,4 +37,11 @@ export const api = {
 
   getMine: (authToken: string) =>
     apiFetch<{ data: MyAudit[]; timestamp: string }>('/analyses/mine', { authToken }),
+
+  createCheckout: (body: { plan: 'pro' | 'business'; email?: string }, authToken: string) =>
+    apiFetch<{ data: { checkoutUrl: string } }>('/payments/checkout', {
+      method: 'POST',
+      body: JSON.stringify(body),
+      authToken,
+    }),
 };

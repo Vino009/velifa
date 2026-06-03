@@ -32,6 +32,11 @@ class EnvironmentVariables {
   @IsString() JWT_SECRET: string = '';
   @IsOptional() @IsString() CLERK_SECRET_KEY?: string;
   @IsOptional() @IsString() SENTRY_DSN?: string;
+  @IsOptional() @IsString() LEMONSQUEEZY_API_KEY?: string;
+  @IsOptional() @IsString() LEMONSQUEEZY_STORE_ID?: string;
+  @IsOptional() @IsString() LEMONSQUEEZY_PRO_VARIANT_ID?: string;
+  @IsOptional() @IsString() LEMONSQUEEZY_BUSINESS_VARIANT_ID?: string;
+  @IsOptional() @IsString() LEMONSQUEEZY_WEBHOOK_SECRET?: string;
 }
 
 export function validate(config: Record<string, unknown>) {
@@ -76,4 +81,11 @@ export default () => ({
     secretKey: process.env.CLERK_SECRET_KEY ?? '',
   },
   sentry: { dsn: process.env.SENTRY_DSN ?? '' },
+  lemonSqueezy: {
+    apiKey:             process.env.LEMONSQUEEZY_API_KEY ?? '',
+    storeId:            process.env.LEMONSQUEEZY_STORE_ID ?? '',
+    proVariantId:       process.env.LEMONSQUEEZY_PRO_VARIANT_ID ?? '',
+    businessVariantId:  process.env.LEMONSQUEEZY_BUSINESS_VARIANT_ID ?? '',
+    webhookSecret:      process.env.LEMONSQUEEZY_WEBHOOK_SECRET ?? '',
+  },
 });

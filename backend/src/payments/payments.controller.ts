@@ -1,0 +1,93 @@
+import {
+  Controller,
+  Post,
+  Body,
+  Headers,
+  Req,
+  HttpCode,
+  HttpStatus,
+  UnauthorizedException,
+  Logger,
+  UseGuards,
+} from '@nestjs/common';
+import { ThrottlerGuard } from '@nestjs/throttler';
+import { RawBodyRequest } from '@nestjs/common';
+import { Request } from 'express';
+import { PaymentsService } from './payments.service';
+import { CreateCheckoutDto } from './dto/create-checkout.dto';
+import { verifyClerkToken } from '../common/auth/clerk-auth.service';
+
+@Controller('payments')
+export class PaymentsController {
+  private readonly logger = new Logger(PaymentsController.name);
+
+  constructor(private readonly paymentsService: PaymentsService) {}
+
+  /**
+   * POST /api/v1/payments/checkout
+   * Crée une session de checkout Lemon Squeezy pour l'utilisateur connecté.
+   * Retourne { checkoutUrl: string }.
+   */
+  @Post('checkout')
+  @UseGuards(ThrottlerGuard)
+  @HttpCode(HttpStatus.OK)
+  async createCheckout(
+    @Body() dto: CreateCheckoutDto,
+    @Headers('authorization') authHeader: string | undefined,
+  ) {
+    const clerkUserId = await verifyClerkToken(authHeader);
+    if (!clerkUserId) {
+      throw new UnauthorizedException('Vous devez être connecté pour souscrire à un plan');
+    }
+
+    const checkoutUrl = await this.paymentsService.createCheckoutUrl(
+      dto.plan,
+      clerkUserId,
+      dto.email,
+    );
+
+    return { checkoutUrl };
+  }
+
+  /**
+   * POST /api/v1/payments/webhook
+   * Reçoit les webhooks Lemon Squeezy.
+   * Vérifie la signature HMAC-SHA256 avant traitement.
+   * Traite : subscription_created, subscription_updated, subscription_cancelled.
+   */
+  @Post('webhook')
+  @HttpCode(HttpStatus.OK)
+  async handleWebhook(
+    @Req() req: RawBodyRequest<Request>,
+    @Headers('x-signature') signature: string | undefined,
+  ) {
+    // ── Signature verification ─────────────────────────────────────────────
+    const rawBody = req.rawBody;
+    if (!rawBody) {
+      this.logger.warn('Webhook received without raw body');
+      throw new UnauthorizedException('Raw body missing');
+    }
+    if (!signature) {
+      this.logger.warn('Webhook received without X-Signature header');
+      throw new UnauthorizedException('Signature manquante');
+    }
+
+    const valid = this.paymentsService.verifySignature(rawBody, signature);
+    if (!valid) {
+      this.logger.warn('Webhook signature verification failed');
+      throw new UnauthorizedException('Signature invalide');
+    }
+
+    // ── Parse and dispatch ─────────────────────────────────────────────────
+    let payload: any;
+    try {
+      payload = JSON.parse(rawBody.toString('utf8'));
+    } catch {
+      this.logger.error('Failed to parse webhook payload');
+      return { received: false };
+    }
+
+    await this.paymentsService.handleWebhookEvent(payload);
+    return { received: true };
+  }
+}

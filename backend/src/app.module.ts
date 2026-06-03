@@ -6,6 +6,7 @@ import configuration, { validate } from './config/configuration';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { AnalysesModule } from './analyses/analyses.module';
+import { PaymentsModule } from './payments/payments.module';
 import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
@@ -25,6 +26,7 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
     PrismaModule,
     RedisModule,
     AnalysesModule,
+    PaymentsModule,
   ],
   providers: [
     { provide: APP_FILTER,      useClass: GlobalExceptionFilter },
