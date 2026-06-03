@@ -10,6 +10,7 @@ import { BrevoService } from '../brevo/brevo.service';
 import { SseService } from '../sse/sse.service';
 import { ConfigService } from '@nestjs/config';
 import { BULL_ANALYSES_QUEUE } from '../redis/redis.module';
+import { TechDetectorService } from '../tech-detector/tech-detector.service';
 
 export interface AnalysisJobPayload {
   analysisId: string;
@@ -30,6 +31,7 @@ export class AnalysisWorker {
     private readonly brevo: BrevoService,
     private readonly sse: SseService,
     private readonly config: ConfigService,
+    private readonly techDetector: TechDetectorService,
   ) {}
 
   @Process('run')
@@ -54,20 +56,34 @@ export class AnalysisWorker {
       const mobile = mobileResult.value;
       const desktop = desktopResult.status === 'fulfilled' ? desktopResult.value : null;
 
-      this.logger.log(`[${analysisId}] Capturing screenshot...`);
+      this.logger.log(`[${analysisId}] Capturing screenshot + detecting technologies...`);
       let screenshotUrl: string | null = null;
       let cloudinaryPublicId: string | null = null;
+      let technologies: any[] = [];
 
-      try {
-        const buffer = await this.screenshot.capture(url);
-        if (buffer) {
-          const uploaded = await this.cloudinary.uploadBuffer(buffer, 'velifa/screenshots', `analysis_${analysisId}`);
-          screenshotUrl = uploaded.url;
-          cloudinaryPublicId = uploaded.publicId;
-        }
-      } catch (err: any) {
-        this.logger.warn(`[${analysisId}] Screenshot failed (non-blocking): ${err.message}`);
-        Sentry.captureException(err, { tags: { analysisId, step: 'screenshot' } });
+      // Screenshot et détection de technologies en parallèle (tous deux non-bloquants)
+      const [screenshotResult, techResult] = await Promise.allSettled([
+        (async () => {
+          const buffer = await this.screenshot.capture(url);
+          if (!buffer) return { url: null, publicId: null };
+          return this.cloudinary.uploadBuffer(buffer, 'velifa/screenshots', `analysis_${analysisId}`);
+        })(),
+        this.techDetector.detect(url),
+      ]);
+
+      if (screenshotResult.status === 'fulfilled' && screenshotResult.value?.url) {
+        screenshotUrl      = screenshotResult.value.url;
+        cloudinaryPublicId = screenshotResult.value.publicId;
+      } else if (screenshotResult.status === 'rejected') {
+        this.logger.warn(`[${analysisId}] Screenshot failed (non-blocking): ${screenshotResult.reason?.message}`);
+        Sentry.captureException(screenshotResult.reason, { tags: { analysisId, step: 'screenshot' } });
+      }
+
+      if (techResult.status === 'fulfilled') {
+        technologies = techResult.value;
+        this.logger.log(`[${analysisId}] Technologies: ${technologies.map((t: any) => t.name).join(', ') || 'none'}`);
+      } else {
+        this.logger.warn(`[${analysisId}] TechDetector failed (non-blocking): ${techResult.reason?.message}`);
       }
 
       const frontendUrl = this.config.get<string>('frontendUrl', '');
@@ -96,6 +112,7 @@ export class AnalysisWorker {
         blockingScripts:   mobile.blockingScripts,
         unusedResources:   mobile.unusedResources,
         reportJson:        mobile.rawJson,
+        technologies:      technologies.length ? technologies : null,
         screenshotUrl,
         cloudinaryPublicId,
         whatsappLink,

@@ -214,7 +214,11 @@ export default async function ReportPage({ params }: { params: { id: string } })
           </div>
         )}
         {/* ── Section Pro / Bannière upgrade ──────────────────────────── */}
-        <ReportProFeatures reportJson={analysis.reportJson} analysisId={analysis.id} />
+        <ReportProFeatures
+          reportJson={analysis.reportJson}
+          technologies={analysis.technologies}
+          analysisId={analysis.id}
+        />
       </div>
 
       {/* ── Sticky WhatsApp CTA ──────────────────────────────────────── */}

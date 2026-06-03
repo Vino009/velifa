@@ -3,130 +3,123 @@
 import Link from 'next/link';
 import {
   Sparkles, Lock, Download, Server, Code2, Globe2,
-  Megaphone, Share2, Tag, Cookie, Wifi, LayoutGrid, Zap,
+  Megaphone, Share2, Tag, Cookie, Wifi, LayoutGrid,
+  Layers, ShoppingCart, Pencil, BarChart2, CheckCircle2,
+  AlertCircle, Minus,
 } from 'lucide-react';
 import { useSubscription } from '@/context/SubscriptionContext';
+import type { DetectedTech, TechCategory } from '@/types/analysis';
 
-// ── Catégories d'entités → icône + libellé FR ─────────────────────────────
-const CATEGORY_META: Record<string, { label: string; icon: React.ReactNode }> = {
-  ad:              { label: 'Publicité',       icon: <Megaphone className="w-3.5 h-3.5" /> },
-  analytics:       { label: 'Analytics',       icon: <LayoutGrid className="w-3.5 h-3.5" /> },
-  social:          { label: 'Réseaux sociaux', icon: <Share2 className="w-3.5 h-3.5" /> },
-  'tag-manager':   { label: 'Tag Manager',     icon: <Tag className="w-3.5 h-3.5" /> },
-  cdn:             { label: 'CDN',             icon: <Wifi className="w-3.5 h-3.5" /> },
-  'customer-success': { label: 'Support',      icon: <Globe2 className="w-3.5 h-3.5" /> },
-  marketing:       { label: 'Marketing',       icon: <Megaphone className="w-3.5 h-3.5" /> },
-  utility:         { label: 'Utilitaire',      icon: <Code2 className="w-3.5 h-3.5" /> },
+// ── Icônes par catégorie ───────────────────────────────────────────────────
+const CATEGORY_ICON: Record<TechCategory, React.ReactNode> = {
+  'CMS':          <Pencil      className="w-4 h-4" />,
+  'Framework JS': <Code2       className="w-4 h-4" />,
+  'Analytics':    <BarChart2   className="w-4 h-4" />,
+  'Serveur':      <Server      className="w-4 h-4" />,
 };
 
-function categoryMeta(cat?: string) {
-  return CATEGORY_META[cat ?? ''] ?? { label: 'Tiers', icon: <Globe2 className="w-3.5 h-3.5" /> };
+const CATEGORY_COLOR: Record<TechCategory, string> = {
+  'CMS':          'rgba(139,92,246,0.15)',   // violet
+  'Framework JS': 'rgba(59,130,246,0.15)',   // bleu
+  'Analytics':    'rgba(16,185,129,0.15)',   // vert
+  'Serveur':      'rgba(245,158,11,0.15)',   // ambre
+};
+const CATEGORY_BORDER: Record<TechCategory, string> = {
+  'CMS':          'rgba(139,92,246,0.35)',
+  'Framework JS': 'rgba(59,130,246,0.35)',
+  'Analytics':    'rgba(16,185,129,0.35)',
+  'Serveur':      'rgba(245,158,11,0.35)',
+};
+const CATEGORY_TEXT: Record<TechCategory, string> = {
+  'CMS':          '#a78bfa',
+  'Framework JS': '#60a5fa',
+  'Analytics':    '#34d399',
+  'Serveur':      '#fbbf24',
+};
+
+function ConfidenceDot({ level }: { level: 'high' | 'medium' | 'low' }) {
+  if (level === 'high')   return <CheckCircle2 className="w-3 h-3 flex-shrink-0" style={{ color: '#0CCE6B' }} />;
+  if (level === 'medium') return <AlertCircle  className="w-3 h-3 flex-shrink-0" style={{ color: '#FFA400' }} />;
+  return                         <Minus         className="w-3 h-3 flex-shrink-0" style={{ color: 'var(--text-subtle)' }} />;
 }
 
-// ── Normalise : PageSpeed wrappe dans lighthouseResult ────────────────────
-function getLighthouseData(reportJson: any): any {
-  if (!reportJson || typeof reportJson !== 'object') return null;
-  return reportJson.lighthouseResult ?? reportJson;
+// ── Section tech détectée (badge par tech) ────────────────────────────────
+function TechBadge({ tech }: { tech: DetectedTech }) {
+  const cat = tech.category;
+  return (
+    <div
+      className="flex items-start gap-3 p-3 rounded-[var(--velifa-radius-md)]"
+      style={{
+        background: CATEGORY_COLOR[cat],
+        border: `1px solid ${CATEGORY_BORDER[cat]}`,
+      }}
+    >
+      <span style={{ color: CATEGORY_TEXT[cat] }} className="flex-shrink-0 mt-0.5">
+        {CATEGORY_ICON[cat]}
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="text-sm font-semibold text-text truncate">{tech.name}</span>
+          {tech.version && (
+            <span
+              className="text-[10px] px-1.5 py-0.5 rounded font-mono"
+              style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--text-muted)' }}
+            >
+              v{tech.version}
+            </span>
+          )}
+          <ConfidenceDot level={tech.confidence} />
+        </div>
+        <span
+          className="text-[10px] font-semibold tracking-widest uppercase mt-0.5 block"
+          style={{ color: CATEGORY_TEXT[cat] }}
+        >
+          {cat}
+        </span>
+      </div>
+    </div>
+  );
 }
 
-// ── Extraction structurée ─────────────────────────────────────────────────
-interface TechSection {
-  title: string;
-  icon: React.ReactNode;
-  items: Array<{ label: string; sub?: string; icon?: React.ReactNode }>;
-}
-
-function extractTechSections(reportJson: any): TechSection[] {
-  const lh = getLighthouseData(reportJson);
-  if (!lh) return [];
-
-  const sections: TechSection[] = [];
-
-  // ── 1. Stack Packs (CMS / framework détecté par Lighthouse) ─────────
-  const stacks: string[] = (lh.stackPacks ?? [])
-    .map((s: any) => s.title ?? s.id)
-    .filter(Boolean);
-  if (stacks.length) {
-    sections.push({
-      title: 'Stack détecté',
-      icon: <Code2 className="w-4 h-4" />,
-      items: stacks.map((s) => ({ label: s })),
-    });
-  }
-
-  // ── 2. Entités tierces (depuis entities[]) ───────────────────────────
-  const entities: any[] = lh.entities ?? [];
-  const thirdParty = entities
+// ── Extraction services tiers Lighthouse (complément) ─────────────────────
+function extractLighthouseServices(reportJson: any): Array<{ name: string; category: string }> {
+  const lh = reportJson?.lighthouseResult ?? reportJson;
+  if (!lh?.entities) return [];
+  return (lh.entities as any[])
     .filter((e) => !e.isFirstParty && !e.isUnrecognized && e.name)
-    .slice(0, 8);
-
-  if (thirdParty.length) {
-    // Groupe par catégorie
-    const byCategory: Record<string, string[]> = {};
-    for (const e of thirdParty) {
-      const cat = e.category ?? 'utility';
-      if (!byCategory[cat]) byCategory[cat] = [];
-      byCategory[cat].push(e.name);
-    }
-    sections.push({
-      title: 'Services tiers détectés',
-      icon: <Globe2 className="w-4 h-4" />,
-      items: Object.entries(byCategory).map(([cat, names]) => ({
-        label: names.join(', '),
-        sub: categoryMeta(cat).label,
-        icon: categoryMeta(cat).icon,
-      })),
-    });
-  }
-
-  // ── 3. Serveur — temps de réponse ────────────────────────────────────
-  const srt = lh.audits?.['server-response-time'];
-  if (srt != null) {
-    const ms = Math.round(srt.numericValue ?? 0);
-    const qual = ms < 200 ? '✓ Excellent' : ms < 600 ? '~ Correct' : '⚠ Lent';
-    // Protocole réseau via network-requests[0]
-    const proto: string | undefined = lh.audits?.['network-requests']?.details?.items?.[0]?.protocol;
-    const protoLabel = proto
-      ? proto === 'h3' ? 'HTTP/3' : proto === 'h2' ? 'HTTP/2' : proto.toUpperCase()
-      : undefined;
-
-    const items: TechSection['items'] = [
-      { label: `${ms} ms`, sub: `Temps de réponse serveur — ${qual}`, icon: <Zap className="w-3.5 h-3.5" /> },
-    ];
-    if (protoLabel) {
-      items.push({ label: protoLabel, sub: 'Protocole réseau', icon: <Wifi className="w-3.5 h-3.5" /> });
-    }
-    sections.push({ title: 'Serveur', icon: <Server className="w-4 h-4" />, items });
-  }
-
-  // ── 4. Cookies tiers ─────────────────────────────────────────────────
-  const cookieAudit = lh.audits?.['third-party-cookies'];
-  if (cookieAudit?.details?.items?.length) {
-    const count = cookieAudit.details.items.length;
-    sections.push({
-      title: 'Cookies tiers',
-      icon: <Cookie className="w-4 h-4" />,
-      items: [
-        {
-          label: `${count} cookie${count > 1 ? 's' : ''} tiers détecté${count > 1 ? 's' : ''}`,
-          sub: cookieAudit.details.items.slice(0, 3).map((c: any) => c.name).join(', '),
-          icon: <Cookie className="w-3.5 h-3.5" />,
-        },
-      ],
-    });
-  }
-
-  return sections;
+    .slice(0, 6)
+    .map((e) => ({ name: e.name, category: e.category ?? 'utility' }));
 }
+
+// ── Catégories des services Lighthouse → icône ────────────────────────────
+const LS_CAT_ICON: Record<string, React.ReactNode> = {
+  ad:               <Megaphone className="w-3 h-3" />,
+  analytics:        <LayoutGrid className="w-3 h-3" />,
+  social:           <Share2    className="w-3 h-3" />,
+  'tag-manager':    <Tag       className="w-3 h-3" />,
+  cdn:              <Wifi      className="w-3 h-3" />,
+};
+function lsIcon(cat: string) {
+  return LS_CAT_ICON[cat] ?? <Globe2 className="w-3 h-3" />;
+}
+const LS_CAT_FR: Record<string, string> = {
+  ad: 'Pub', analytics: 'Analytics', social: 'Social',
+  'tag-manager': 'Tag Manager', cdn: 'CDN',
+};
 
 // ── Composant principal ────────────────────────────────────────────────────
-export default function ReportProFeatures({ reportJson, analysisId }: {
-  reportJson: any;
-  analysisId: string;
+export default function ReportProFeatures({
+  reportJson,
+  technologies,
+  analysisId,
+}: {
+  reportJson:   any;
+  technologies?: DetectedTech[] | null;
+  analysisId:   string;
 }) {
   const { isActive, plan } = useSubscription();
 
-  // ── Bannière gratuit ────────────────────────────────────────────────────
+  // ── Bannière gratuit ──────────────────────────────────────────────────
   if (!isActive) {
     return (
       <div
@@ -148,7 +141,8 @@ export default function ReportProFeatures({ reportJson, analysisId }: {
             Débloquez le rapport complet avec Velifa Pro
           </p>
           <p className="text-text-muted text-sm mt-1 leading-relaxed">
-            Détection des technologies, services tiers, export PDF, historique illimité.
+            Détection automatique des technologies (CMS, frameworks, analytics),
+            services tiers, export PDF et historique illimité.
           </p>
         </div>
         <Link href="/tarifs" className="velifa-btn flex-shrink-0 flex items-center gap-2 text-sm">
@@ -159,14 +153,25 @@ export default function ReportProFeatures({ reportJson, analysisId }: {
     );
   }
 
-  // ── Sections Pro ────────────────────────────────────────────────────────
-  const techSections = extractTechSections(reportJson);
-  const planLabel = plan === 'business' ? 'Business' : 'Pro';
+  // ── Mode Pro ──────────────────────────────────────────────────────────
+  const planLabel      = plan === 'business' ? 'Business' : 'Pro';
+  const hasTech        = Array.isArray(technologies) && technologies.length > 0;
+  const lsServices     = extractLighthouseServices(reportJson);
+  const hasLsServices  = lsServices.length > 0;
+
+  // Groupe les technologies par catégorie pour l'affichage
+  const byCategory: Partial<Record<TechCategory, DetectedTech[]>> = {};
+  if (hasTech) {
+    for (const t of technologies!) {
+      if (!byCategory[t.category]) byCategory[t.category] = [];
+      byCategory[t.category]!.push(t);
+    }
+  }
 
   return (
     <div className="space-y-4">
 
-      {/* Badge rapport Pro */}
+      {/* ── Badge rapport Pro ──────────────────────────────────── */}
       <div className="flex items-center gap-3">
         <span
           className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-widest uppercase"
@@ -183,7 +188,7 @@ export default function ReportProFeatures({ reportJson, analysisId }: {
         <span className="text-text-subtle text-xs">Analyse avancée activée</span>
       </div>
 
-      {/* Détection des technologies */}
+      {/* ── Section technologies détectées ─────────────────────── */}
       <div
         style={{
           background: 'linear-gradient(135deg, rgba(36,36,36,0.9) 0%, rgba(18,18,18,0.95) 100%)',
@@ -194,52 +199,84 @@ export default function ReportProFeatures({ reportJson, analysisId }: {
         }}
       >
         <div className="flex items-center gap-2 mb-5">
-          <Code2 className="w-4 h-4" style={{ color: 'var(--accent)' }} strokeWidth={1.75} />
-          <h2 className="font-heading font-semibold text-text text-base">Détection des technologies</h2>
+          <Layers className="w-4 h-4" style={{ color: 'var(--accent)' }} strokeWidth={1.75} />
+          <h2 className="font-heading font-semibold text-text text-base">
+            Détection des technologies
+          </h2>
+          {hasTech && (
+            <span
+              className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full"
+              style={{ background: 'rgba(212,175,55,0.12)', color: 'var(--accent)' }}
+            >
+              {technologies!.length} trouvée{technologies!.length > 1 ? 's' : ''}
+            </span>
+          )}
         </div>
 
-        {techSections.length === 0 ? (
-          <p className="text-text-muted text-sm py-4 text-center">
-            Aucune technologie détectée automatiquement pour ce site.
-          </p>
+        {!hasTech ? (
+          /* Aucune tech détectée → message propre */
+          <div className="flex flex-col items-center gap-2 py-6 text-center">
+            <Globe2 className="w-7 h-7 text-text-subtle" strokeWidth={1.5} />
+            <p className="text-text-muted text-sm">
+              Aucune technologie détectée automatiquement pour ce site.
+            </p>
+            <p className="text-text-subtle text-xs max-w-xs">
+              Le site peut utiliser des technologies obfusquées ou non reconnues par nos signatures.
+            </p>
+          </div>
         ) : (
           <div className="space-y-5">
-            {techSections.map((section) => (
-              <div key={section.title}>
-                {/* Titre de section */}
-                <div className="flex items-center gap-2 mb-2.5">
-                  <span className="text-text-subtle">{section.icon}</span>
-                  <span className="text-[10px] font-bold tracking-widest uppercase text-text-subtle">
-                    {section.title}
-                  </span>
+            {/* Par catégorie dans l'ordre : CMS → Framework → Analytics → Serveur */}
+            {(['CMS', 'Framework JS', 'Analytics', 'Serveur'] as TechCategory[])
+              .filter((cat) => byCategory[cat]?.length)
+              .map((cat) => (
+                <div key={cat}>
+                  <div className="flex items-center gap-2 mb-2.5">
+                    <span style={{ color: CATEGORY_TEXT[cat] }}>{CATEGORY_ICON[cat]}</span>
+                    <span className="text-[10px] font-bold tracking-widest uppercase"
+                      style={{ color: CATEGORY_TEXT[cat] }}>
+                      {cat}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {byCategory[cat]!.map((tech) => (
+                      <TechBadge key={tech.name} tech={tech} />
+                    ))}
+                  </div>
                 </div>
-                {/* Items */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {section.items.map((item, i) => (
-                    <div
-                      key={i}
-                      className="flex items-start gap-2.5 px-3 py-2.5 rounded-[var(--velifa-radius-md)]"
-                      style={{ background: 'var(--surface-raised)' }}
-                    >
-                      {item.icon && (
-                        <span className="text-text-subtle mt-0.5 flex-shrink-0">{item.icon}</span>
-                      )}
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-text truncate">{item.label}</p>
-                        {item.sub && (
-                          <p className="text-xs text-text-muted mt-0.5 truncate">{item.sub}</p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+              ))}
+          </div>
+        )}
+
+        {/* ── Services tiers Lighthouse (complément) ─────────── */}
+        {hasLsServices && (
+          <div className="mt-5 pt-5 border-t border-border">
+            <div className="flex items-center gap-2 mb-3">
+              <Globe2 className="w-3.5 h-3.5 text-text-subtle" />
+              <span className="text-[10px] font-bold tracking-widest uppercase text-text-subtle">
+                Services tiers (Lighthouse)
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {lsServices.map((s) => (
+                <span
+                  key={s.name}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs"
+                  style={{ background: 'var(--surface-raised)', color: 'var(--text-muted)' }}
+                >
+                  <span className="text-text-subtle">{lsIcon(s.category)}</span>
+                  {s.name}
+                  {LS_CAT_FR[s.category] && (
+                    <span className="text-[10px] text-text-subtle">· {LS_CAT_FR[s.category]}</span>
+                  )}
+                </span>
+              ))}
+            </div>
           </div>
         )}
       </div>
 
-      {/* Export PDF (placeholder) */}
+      {/* ── Export PDF (placeholder) ───────────────────────────── */}
       <div
         className="flex items-center justify-between gap-4 p-4 rounded-[var(--velifa-radius-lg)]"
         style={{

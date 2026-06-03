@@ -8,6 +8,7 @@ import { ScreenshotModule } from '../screenshot/screenshot.module';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 import { BrevoModule } from '../brevo/brevo.module';
 import { SseModule } from '../sse/sse.module';
+import { TechDetectorModule } from '../tech-detector/tech-detector.module';
 import { BULL_ANALYSES_QUEUE } from '../redis/redis.module';
 
 @Module({
@@ -18,6 +19,7 @@ import { BULL_ANALYSES_QUEUE } from '../redis/redis.module';
     CloudinaryModule,
     BrevoModule,
     SseModule,
+    TechDetectorModule,
   ],
   controllers: [AnalysesController],
   providers: [AnalysesService, AnalysisWorker],

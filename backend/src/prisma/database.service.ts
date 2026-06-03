@@ -26,6 +26,7 @@ export interface Analysis {
   blockingScripts: any;
   unusedResources: any;
   reportJson: any;
+  technologies: any | null;
   screenshotUrl: string | null;
   cloudinaryPublicId: string | null;
   whatsappLink: string | null;
@@ -68,6 +69,15 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   /** Non-destructive migrations run at startup */
   private async runMigrations(): Promise<void> {
     try {
+      // Colonne technologies (détection auto)
+      await this.pool.query(`
+        ALTER TABLE analyses ADD COLUMN IF NOT EXISTS
+        technologies JSON NULL
+      `).catch(() => {
+        // Certains drivers MySQL ne supportent pas IF NOT EXISTS sur ALTER COLUMN
+        // → on ignore silencieusement si la colonne existe déjà
+      });
+
       await this.pool.query(`
         CREATE TABLE IF NOT EXISTS users (
           id                   VARCHAR(36)  NOT NULL DEFAULT (UUID()),
@@ -125,6 +135,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       blockingScripts:     this.parseJson(row.blocking_scripts),
       unusedResources:     this.parseJson(row.unused_resources),
       reportJson:          this.parseJson(row.report_json),
+      technologies:        this.parseJson(row.technologies),
       screenshotUrl:       row.screenshot_url,
       cloudinaryPublicId:  row.cloudinary_public_id,
       whatsappLink:        row.whatsapp_link,
@@ -196,6 +207,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       fcpDesktop: 'fcp_desktop', ttfbDesktop: 'ttfb_desktop',
       imagesToOptimize: 'images_to_optimize', blockingScripts: 'blocking_scripts',
       unusedResources: 'unused_resources', reportJson: 'report_json',
+      technologies: 'technologies',
       screenshotUrl: 'screenshot_url', cloudinaryPublicId: 'cloudinary_public_id',
       whatsappLink: 'whatsapp_link', reportUrl: 'report_url',
       locale: 'locale', source: 'source', clerkUserId: 'clerk_user_id', ipAddress: 'ip_address',

@@ -1,5 +1,15 @@
 export type AnalysisStatus = 'pending' | 'processing' | 'completed' | 'failed';
 
+export type TechCategory   = 'CMS' | 'Framework JS' | 'Analytics' | 'Serveur';
+export type TechConfidence = 'high' | 'medium' | 'low';
+
+export interface DetectedTech {
+  name:       string;
+  category:   TechCategory;
+  confidence: TechConfidence;
+  version?:   string;
+}
+
 export interface AuditItem {
   url?: string;
   title: string;
@@ -32,6 +42,7 @@ export interface Analysis {
   blockingScripts?: AuditItem[] | null;
   unusedResources?: AuditItem[] | null;
   reportJson?: any | null;
+  technologies?: DetectedTech[] | null;
   errorMessage?: string | null;
   createdAt: string;
   completedAt?: string | null;
