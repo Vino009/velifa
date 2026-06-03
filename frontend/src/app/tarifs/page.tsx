@@ -4,8 +4,9 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth, useUser } from '@clerk/nextjs';
-import { Check, Zap, Loader2 } from 'lucide-react';
+import { Check, Zap, Loader2, CheckCircle2, Sparkles } from 'lucide-react';
 import { api } from '@/lib/api';
+import { useSubscription } from '@/context/SubscriptionContext';
 
 // ── Plan definitions ──────────────────────────────────────────────────────
 const plans = [
@@ -142,6 +143,7 @@ function CheckoutButton({
 export default function TarifsPage() {
   const { user } = useUser();
   const userEmail = user?.primaryEmailAddress?.emailAddress ?? null;
+  const { plan: currentPlan, isActive } = useSubscription();
 
   return (
     <main className="min-h-screen bg-bg">
@@ -160,6 +162,22 @@ export default function TarifsPage() {
 
       {/* ── Plans ─────────────────────────────────────────────────── */}
       <section className="max-w-5xl mx-auto px-6 pb-20">
+        {/* Badge plan actuel visible si abonné */}
+        {isActive && currentPlan && (
+          <div className="flex justify-center mb-8">
+            <span
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold"
+              style={{
+                background: 'linear-gradient(135deg, rgba(212,175,55,0.14) 0%, rgba(168,123,30,0.10) 100%)',
+                border: '1px solid rgba(212,175,55,0.40)',
+                color: 'var(--accent)',
+              }}
+            >
+              <Sparkles className="w-4 h-4" />
+              Vous êtes actuellement sur le plan&nbsp;<strong className="capitalize">{currentPlan}</strong>
+            </span>
+          </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
           {plans.map((plan) => (
             <div
@@ -213,15 +231,28 @@ export default function TarifsPage() {
 
               {/* CTA */}
               {plan.ctaHref !== null ? (
-                /* Plan Gratuit — simple lien */
-                <Link
-                  href={plan.ctaHref}
-                  className="velifa-btn velifa-btn--ghost w-full text-center"
-                >
+                /* Plan Gratuit */
+                <Link href={plan.ctaHref} className="velifa-btn velifa-btn--ghost w-full text-center">
                   {plan.cta}
                 </Link>
+              ) : isActive && currentPlan === plan.key ? (
+                /* Plan actuel de l'utilisateur */
+                <div className="flex flex-col items-center gap-2">
+                  <div
+                    className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-[var(--velifa-radius-md)] font-heading font-semibold text-sm tracking-wide"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(168,123,30,0.18) 100%)',
+                      border: '1px solid rgba(212,175,55,0.45)',
+                      color: 'var(--accent)',
+                    }}
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    Plan actuel ✓
+                  </div>
+                  <p className="text-xs text-text-subtle">Votre abonnement actif</p>
+                </div>
               ) : (
-                /* Plans payants — bouton checkout */
+                /* Autre plan payant — bouton checkout */
                 <CheckoutButton
                   plan={plan.key!}
                   label={plan.cta}

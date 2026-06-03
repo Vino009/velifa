@@ -1,4 +1,5 @@
 import type { Analysis, CreateAnalysisResponse, MyAudit } from '@/types/analysis';
+import type { SubscriptionInfo } from '@/types/subscription';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
 
@@ -44,4 +45,7 @@ export const api = {
       body: JSON.stringify(body),
       authToken,
     }),
+
+  getMyPlan: (authToken: string) =>
+    apiFetch<{ data: SubscriptionInfo }>('/payments/me', { authToken }),
 };

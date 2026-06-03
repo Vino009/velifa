@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
   Headers,
   Req,
@@ -22,6 +23,21 @@ export class PaymentsController {
   private readonly logger = new Logger(PaymentsController.name);
 
   constructor(private readonly paymentsService: PaymentsService) {}
+
+  /**
+   * GET /api/v1/payments/me
+   * Retourne le plan et statut d'abonnement de l'utilisateur connecté.
+   * Retourne plan: null si l'utilisateur n'a pas encore de ligne dans users.
+   */
+  @Get('me')
+  @UseGuards(ThrottlerGuard)
+  async getMyPlan(@Headers('authorization') authHeader: string | undefined) {
+    const clerkUserId = await verifyClerkToken(authHeader);
+    if (!clerkUserId) {
+      throw new UnauthorizedException('Token Clerk requis');
+    }
+    return this.paymentsService.getMyPlan(clerkUserId);
+  }
 
   /**
    * POST /api/v1/payments/checkout

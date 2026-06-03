@@ -141,6 +141,19 @@ export class PaymentsService {
     }
   }
 
+  // ── Plan lookup ───────────────────────────────────────────────────────────
+
+  async getMyPlan(clerkUserId: string): Promise<{
+    subscription_plan:   'pro' | 'business' | null;
+    subscription_status: string | null;
+  }> {
+    const user = await this.db.findUserByClerkId(clerkUserId);
+    return {
+      subscription_plan:   (user?.subscriptionPlan as 'pro' | 'business' | null) ?? null,
+      subscription_status: user?.subscriptionStatus ?? null,
+    };
+  }
+
   // ── Webhook event handler ─────────────────────────────────────────────────
 
   async handleWebhookEvent(payload: any): Promise<void> {

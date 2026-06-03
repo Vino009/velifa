@@ -10,10 +10,11 @@ import {
 } from 'recharts';
 import {
   Loader2, Globe, ArrowRight, BarChart3, Gauge, Trophy, Award,
-  FileSearch, Zap, Plus, TrendingUp,
+  FileSearch, Zap, Plus, TrendingUp, Sparkles, X,
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { MyAudit } from '@/types/analysis';
+import { useSubscription } from '@/context/SubscriptionContext';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 function formatDate(iso: string | null): string {
@@ -391,18 +392,75 @@ function AuditCardSkeleton() {
   );
 }
 
+// ── Badge plan ─────────────────────────────────────────────────────────────
+function PlanBadge({ plan }: { plan: 'pro' | 'business' | null }) {
+  if (plan === 'pro') return (
+    <span
+      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-widest uppercase"
+      style={{
+        background: 'linear-gradient(135deg, rgba(212,175,55,0.18) 0%, rgba(168,123,30,0.25) 100%)',
+        border: '1px solid rgba(212,175,55,0.45)',
+        color: 'var(--accent)',
+        boxShadow: '0 2px 12px rgba(212,175,55,0.15)',
+      }}
+    >
+      <Sparkles className="w-3 h-3" />
+      Pro
+    </span>
+  );
+  if (plan === 'business') return (
+    <span
+      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-widest uppercase"
+      style={{
+        background: 'linear-gradient(135deg, rgba(212,175,55,0.22) 0%, rgba(135,97,26,0.30) 100%)',
+        border: '1px solid rgba(212,175,55,0.55)',
+        color: 'var(--accent)',
+        boxShadow: '0 2px 16px rgba(212,175,55,0.20)',
+      }}
+    >
+      <Sparkles className="w-3 h-3" />
+      Business
+    </span>
+  );
+  return (
+    <span
+      className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold tracking-widest uppercase"
+      style={{
+        background: 'var(--surface-raised)',
+        border: '1px solid var(--border)',
+        color: 'var(--text-subtle)',
+      }}
+    >
+      Gratuit
+    </span>
+  );
+}
+
 // ── Page principale ────────────────────────────────────────────────────────
 export default function DashboardPage() {
   const router = useRouter();
   const { isSignedIn, isLoaded, getToken } = useAuth();
   const { user } = useUser();
+  const { plan: subPlan } = useSubscription();
   const [audits, setAudits] = useState<MyAudit[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [upgradeBanner, setUpgradeBanner] = useState(false);
 
   // Redirect si non connecté — inchangé
   useEffect(() => {
     if (isLoaded && !isSignedIn) router.push('/sign-in');
   }, [isLoaded, isSignedIn, router]);
+
+  // Bandeau ?upgraded=true
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('upgraded') === 'true') {
+      setUpgradeBanner(true);
+      // Nettoie l'URL sans rechargement
+      window.history.replaceState({}, '', '/dashboard');
+    }
+  }, []);
 
   // Fetch des audits — inchangé
   useEffect(() => {
@@ -460,13 +518,47 @@ export default function DashboardPage() {
       <main className="min-h-screen bg-bg">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 py-10 sm:py-16">
 
-          {/* En-tête personnalisé */}
+          {/* ── Bandeau de félicitations upgraded=true ─────────────── */}
+          {upgradeBanner && (
+            <div
+              className="fade-up mb-8 flex items-center justify-between gap-4 px-5 py-4 rounded-[var(--velifa-radius-lg)]"
+              style={{
+                background: 'linear-gradient(135deg, rgba(212,175,55,0.14) 0%, rgba(168,123,30,0.08) 100%)',
+                border: '1px solid rgba(212,175,55,0.40)',
+                boxShadow: '0 4px 24px rgba(212,175,55,0.12)',
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <Sparkles className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--accent)' }} />
+                <div>
+                  <p className="font-heading font-semibold text-sm" style={{ color: 'var(--accent)' }}>
+                    Bienvenue dans Velifa {subPlan === 'business' ? 'Business' : 'Pro'} !&nbsp;🎉
+                  </p>
+                  <p className="text-text-muted text-xs mt-0.5">
+                    Votre abonnement est actif. Profitez de toutes vos fonctionnalités.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setUpgradeBanner(false)}
+                className="flex-shrink-0 text-text-subtle hover:text-text transition-colors"
+                aria-label="Fermer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+          {/* ── En-tête personnalisé ────────────────────────────────── */}
           <div className="fade-up flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-10 sm:mb-14">
             <div>
               <p className="velifa-eyebrow mb-2">Mon espace</p>
-              <h1 className="font-heading font-bold text-3xl sm:text-4xl text-text tracking-tight">
-                {firstName ? `Bonjour, ${firstName}` : 'Bonjour'}
-              </h1>
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="font-heading font-bold text-3xl sm:text-4xl text-text tracking-tight">
+                  {firstName ? `Bonjour, ${firstName}` : 'Bonjour'}
+                </h1>
+                <PlanBadge plan={subPlan} />
+              </div>
               <p className="text-text-muted mt-2 text-sm sm:text-base">
                 Vos audits de performance web en un coup d&apos;œil.
               </p>

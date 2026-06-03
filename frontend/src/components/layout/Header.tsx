@@ -1,35 +1,53 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { Zap, Menu, X } from 'lucide-react';
-import { UserButton } from '@clerk/nextjs';
-import { useAuth } from '@clerk/nextjs';
+import { Zap, Menu, X, Sparkles } from 'lucide-react';
+import { UserButton, useAuth } from '@clerk/nextjs';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { useSubscription } from '@/context/SubscriptionContext';
 
 const navLinks: Array<{ label: string; href: '/' | '/fonctionnalites' | '/tarifs' | '/faq' | '/contact' }> = [
-  { label: 'Accueil',         href: '/' as const },
-  { label: 'Fonctionnalités', href: '/fonctionnalites' as const },
-  { label: 'Tarifs',         href: '/tarifs' as const },
-  { label: 'FAQ',            href: '/faq' as const },
-  { label: 'Contact',        href: '/contact' as const },
+  { label: 'Accueil',         href: '/' },
+  { label: 'Fonctionnalités', href: '/fonctionnalites' },
+  { label: 'Tarifs',          href: '/tarifs' },
+  { label: 'FAQ',             href: '/faq' },
+  { label: 'Contact',         href: '/contact' },
 ];
+
+/** Petit badge doré inline (Pro / Business) — null = rien affiché */
+function HeaderPlanBadge({ plan }: { plan: 'pro' | 'business' | null }) {
+  if (!plan) return null;
+  return (
+    <span
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase leading-none"
+      style={{
+        background: 'linear-gradient(135deg, rgba(212,175,55,0.20) 0%, rgba(168,123,30,0.28) 100%)',
+        border: '1px solid rgba(212,175,55,0.45)',
+        color: 'var(--accent)',
+      }}
+    >
+      <Sparkles className="w-2.5 h-2.5" />
+      {plan === 'business' ? 'Biz' : 'Pro'}
+    </span>
+  );
+}
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { userId } = useAuth();
+  const { plan } = useSubscription();
 
   return (
     <header className="bg-surface border-b border-border sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 py-4">
-        {/* Desktop layout */}
+
+        {/* ── Desktop ──────────────────────────────────────────────── */}
         <div className="hidden md:flex items-center gap-8">
-          {/* Wordmark */}
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
             <Zap className="w-5 h-5 text-accent" />
             <span className="velifa-wordmark text-sm">VELIFA</span>
           </Link>
 
-          {/* Nav links — takes the middle space, centers its own content */}
           <nav className="flex-1 flex items-center justify-center gap-8">
             {navLinks.map(({ label, href }) => (
               <Link
@@ -42,39 +60,33 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Actions */}
           <div className="flex items-center gap-3 flex-shrink-0">
             <ThemeToggle />
             {userId ? (
               <>
                 <Link
                   href="/dashboard"
-                  className="text-sm text-text-muted hover:text-accent transition-colors whitespace-nowrap"
+                  className="flex items-center gap-1.5 text-sm text-text-muted hover:text-accent transition-colors whitespace-nowrap"
                 >
                   Mon espace
+                  <HeaderPlanBadge plan={plan} />
                 </Link>
                 <UserButton />
               </>
             ) : (
-              <Link
-                href="/sign-in"
-                className="velifa-btn velifa-btn--ghost text-xs"
-              >
+              <Link href="/sign-in" className="velifa-btn velifa-btn--ghost text-xs">
                 Connexion
               </Link>
             )}
           </div>
         </div>
 
-        {/* Mobile layout */}
+        {/* ── Mobile ───────────────────────────────────────────────── */}
         <div className="flex md:hidden items-center justify-between">
-          {/* Wordmark */}
           <Link href="/" className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-accent" />
             <span className="velifa-wordmark text-sm">VELIFA</span>
           </Link>
-
-          {/* Right actions */}
           <div className="flex items-center gap-3">
             <ThemeToggle />
             <button
@@ -87,7 +99,7 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Mobile menu */}
+        {/* ── Mobile menu ──────────────────────────────────────────── */}
         {menuOpen && (
           <nav className="md:hidden pt-4 pb-2 border-t border-border mt-4 space-y-1">
             {navLinks.map(({ label, href }) => (
@@ -106,10 +118,11 @@ export default function Header() {
                   <div className="flex flex-col gap-1">
                     <Link
                       href="/dashboard"
-                      className="block py-3 px-2 text-sm text-text-muted hover:text-accent hover:bg-surface-raised rounded-velifa-md transition"
+                      className="flex items-center gap-2 py-3 px-2 text-sm text-text-muted hover:text-accent hover:bg-surface-raised rounded-velifa-md transition"
                       onClick={() => setMenuOpen(false)}
                     >
                       Mon espace
+                      <HeaderPlanBadge plan={plan} />
                     </Link>
                     <span className="px-2 text-xs text-text-subtle">Mon compte</span>
                   </div>
