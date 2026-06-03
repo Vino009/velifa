@@ -209,7 +209,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
   async findAnalysesByUser(clerkUserId: string): Promise<Analysis[]> {
     const [rows] = await this.pool.query<mysql.RowDataPacket[]>(
-      `SELECT * FROM analyses WHERE clerk_user_id = ? AND deleted_at IS NULL ORDER BY created_at DESC`,
+      `SELECT * FROM analyses WHERE clerk_user_id = ? AND status = 'completed' AND deleted_at IS NULL ORDER BY created_at DESC`,
       [clerkUserId],
     );
     return rows.map((row) => this.rowToAnalysis(row));
