@@ -31,6 +31,7 @@ export interface Analysis {
   imagesToOptimize?: AuditItem[] | null;
   blockingScripts?: AuditItem[] | null;
   unusedResources?: AuditItem[] | null;
+  reportJson?: any | null;
   errorMessage?: string | null;
   createdAt: string;
   completedAt?: string | null;

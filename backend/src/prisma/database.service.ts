@@ -245,6 +245,26 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     return rows[0] ? this.rowToAnalysis(rows[0]) : null;
   }
 
+  // ── Rate-limit counters ───────────────────────────────────────────────
+
+  async countRecentAnalysesByUser(clerkUserId: string, cutoff: Date): Promise<number> {
+    const [rows] = await this.pool.query<mysql.RowDataPacket[]>(
+      `SELECT COUNT(*) AS cnt FROM analyses
+       WHERE clerk_user_id = ? AND created_at >= ? AND deleted_at IS NULL`,
+      [clerkUserId, cutoff],
+    );
+    return Number(rows[0]?.cnt ?? 0);
+  }
+
+  async countRecentAnalysesByIp(ipAddress: string, cutoff: Date): Promise<number> {
+    const [rows] = await this.pool.query<mysql.RowDataPacket[]>(
+      `SELECT COUNT(*) AS cnt FROM analyses
+       WHERE ip_address LIKE ? AND created_at >= ? AND deleted_at IS NULL`,
+      [`${ipAddress.replace(/\.xxx$/, '')}%`, cutoff],
+    );
+    return Number(rows[0]?.cnt ?? 0);
+  }
+
   // ── Users / subscriptions ──────────────────────────────────────────────
 
   async upsertUser(data: {

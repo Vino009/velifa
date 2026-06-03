@@ -10,7 +10,7 @@ import {
 } from 'recharts';
 import {
   Loader2, Globe, ArrowRight, BarChart3, Gauge, Trophy, Award,
-  FileSearch, Zap, Plus, TrendingUp, Sparkles, X,
+  FileSearch, Zap, Plus, TrendingUp, Sparkles, X, Lock, MapPin,
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { MyAudit } from '@/types/analysis';
@@ -441,7 +441,8 @@ export default function DashboardPage() {
   const router = useRouter();
   const { isSignedIn, isLoaded, getToken } = useAuth();
   const { user } = useUser();
-  const { plan: subPlan } = useSubscription();
+  const { plan: subPlan, isActive: isPro } = useSubscription();
+  const FREE_AUDIT_LIMIT = 3;
   const [audits, setAudits] = useState<MyAudit[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [upgradeBanner, setUpgradeBanner] = useState(false);
@@ -648,26 +649,120 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Liste des audits */}
-          {!isLoading && !error && hasAudits && (
-            <>
-              <div className="flex items-baseline justify-between mb-5 px-1">
-                <h2 className="font-heading font-semibold text-text text-lg">Vos audits</h2>
-                <span className="text-xs text-text-muted">{audits!.length} au total</span>
-              </div>
-              <div className="space-y-3">
-                {audits!.map((audit, i) => (
+          {/* ── Sites suivis (Pro) ────────────────────────────── */}
+          {isPro && !isLoading && (
+            <div
+              className="fade-up mb-10 sm:mb-14"
+              style={{ animationDelay: '280ms' }}
+            >
+              <div
+                style={{
+                  background: 'linear-gradient(135deg, rgba(36,36,36,0.9) 0%, rgba(18,18,18,0.95) 100%)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--velifa-radius-lg)',
+                  padding: '1.5rem',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.45)',
+                }}
+              >
+                <div className="flex items-center gap-2 mb-4">
+                  <MapPin className="w-4 h-4 text-accent" strokeWidth={1.75} />
+                  <span className="text-[10px] font-semibold tracking-widest uppercase text-text-subtle">
+                    Sites suivis
+                  </span>
+                </div>
+                <div className="flex flex-col items-center justify-center py-8 text-center gap-2">
                   <div
-                    key={audit.id}
-                    className="fade-up"
-                    style={{ animationDelay: `${300 + i * 60}ms` }}
+                    className="w-10 h-10 rounded-full flex items-center justify-center mb-2"
+                    style={{ background: 'var(--surface-raised)' }}
                   >
-                    <AuditCard audit={audit} />
+                    <MapPin className="w-5 h-5 text-text-subtle" strokeWidth={1.5} />
                   </div>
-                ))}
+                  <p className="text-sm font-medium text-text">Ajoutez vos sites à surveiller</p>
+                  <p className="text-xs text-text-muted max-w-xs">
+                    Suivi automatique des performances — fonctionnalité bientôt disponible.
+                  </p>
+                </div>
               </div>
-            </>
+            </div>
           )}
+
+          {/* ── Liste des audits ──────────────────────────────── */}
+          {!isLoading && !error && hasAudits && (() => {
+            const visibleAudits = isPro ? audits! : audits!.slice(0, FREE_AUDIT_LIMIT);
+            const lockedAudits  = isPro ? [] : audits!.slice(FREE_AUDIT_LIMIT);
+
+            return (
+              <>
+                <div className="flex items-baseline justify-between mb-5 px-1">
+                  <h2 className="font-heading font-semibold text-text text-lg">Vos audits</h2>
+                  <span className="text-xs text-text-muted">
+                    {isPro
+                      ? `${audits!.length} au total`
+                      : `${Math.min(audits!.length, FREE_AUDIT_LIMIT)} affichés · ${audits!.length} au total`}
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  {/* Audits visibles */}
+                  {visibleAudits.map((audit, i) => (
+                    <div
+                      key={audit.id}
+                      className="fade-up"
+                      style={{ animationDelay: `${300 + i * 60}ms` }}
+                    >
+                      <AuditCard audit={audit} />
+                    </div>
+                  ))}
+
+                  {/* Audits verrouillés (gratuit seulement) */}
+                  {lockedAudits.length > 0 && (
+                    <div className="relative">
+                      {/* Audits floutés derrière l'overlay */}
+                      <div className="space-y-3 pointer-events-none" style={{ filter: 'blur(3px)', opacity: 0.35 }}>
+                        {lockedAudits.slice(0, 2).map((audit) => (
+                          <AuditCard key={audit.id} audit={audit} />
+                        ))}
+                      </div>
+
+                      {/* Overlay cadenas */}
+                      <div
+                        className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-[var(--velifa-radius-lg)]"
+                        style={{
+                          background: 'linear-gradient(to bottom, transparent 0%, rgba(10,10,10,0.85) 40%, rgba(10,10,10,0.97) 100%)',
+                        }}
+                      >
+                        <div
+                          className="flex flex-col items-center gap-3 text-center px-6"
+                        >
+                          <div
+                            className="w-12 h-12 rounded-full flex items-center justify-center"
+                            style={{
+                              background: 'rgba(212,175,55,0.12)',
+                              border: '1px solid rgba(212,175,55,0.3)',
+                            }}
+                          >
+                            <Lock className="w-5 h-5" style={{ color: 'var(--accent)' }} />
+                          </div>
+                          <div>
+                            <p className="font-heading font-semibold text-text text-sm">
+                              {lockedAudits.length} audit{lockedAudits.length > 1 ? 's' : ''} masqué{lockedAudits.length > 1 ? 's' : ''}
+                            </p>
+                            <p className="text-text-muted text-xs mt-1">
+                              Débloquez l&apos;historique complet avec Velifa Pro
+                            </p>
+                          </div>
+                          <Link href="/tarifs" className="velifa-btn flex items-center gap-2 text-xs mt-1">
+                            <Sparkles className="w-3.5 h-3.5" />
+                            Passer Pro
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            );
+          })()}
 
         </div>
       </main>

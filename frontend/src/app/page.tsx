@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   Loader2, Zap, BarChart2, Mail, MessageCircle, ArrowRight,
   Shield, Clock, Globe, CheckCircle2, ArrowUpRight, ChevronLeft, ChevronRight, Camera,
-  RefreshCw, Eye, X,
+  RefreshCw, Eye, X, Sparkles,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
@@ -17,13 +17,15 @@ function AuditForm() {
   const { getToken, isSignedIn } = useAuth();
   const [url, setUrl]     = useState('');
   const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState('');
-  const [cachedInfo, setCachedInfo] = useState<{ id: string } | null>(null);
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState('');
+  const [rateLimited, setRateLimited] = useState(false);
+  const [cachedInfo, setCachedInfo]   = useState<{ id: string } | null>(null);
 
   async function handleSubmit(e: React.FormEvent, force = false) {
     e.preventDefault();
     setError('');
+    setRateLimited(false);
     setCachedInfo(null);
     setLoading(true);
     try {
@@ -38,7 +40,11 @@ function AuditForm() {
         router.push(`/analyse/loading-page?id=${id}`);
       }
     } catch (err: any) {
-      setError(err.message ?? 'Une erreur est survenue. Veuillez réessayer.');
+      if ((err as any).statusCode === 429) {
+        setRateLimited(true);
+      } else {
+        setError(err.message ?? 'Une erreur est survenue. Veuillez réessayer.');
+      }
     } finally {
       setLoading(false);
     }
@@ -133,6 +139,47 @@ function AuditForm() {
         />
       </div>
 
+      {/* ── Erreur 429 : message incitatif doux ───────────── */}
+      {rateLimited && (
+        <div
+          className="rounded-velifa-lg border p-5 space-y-3"
+          style={{
+            background: 'linear-gradient(135deg, rgba(212,175,55,0.10) 0%, rgba(168,123,30,0.06) 100%)',
+            borderColor: 'rgba(212,175,55,0.40)',
+          }}
+        >
+          <div className="flex items-start gap-3">
+            <Sparkles className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: 'var(--accent)' }} />
+            <div>
+              <p className="text-sm font-semibold" style={{ color: 'var(--accent)' }}>
+                Vous avez utilisé vos audits gratuits du jour
+              </p>
+              <p className="text-xs text-text-muted mt-1 leading-relaxed">
+                Le plan gratuit est limité à 3 audits par 24h. Passez Pro pour des
+                audits illimités, l&apos;historique complet et les rapports avancés.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-3 pt-1">
+            <Link
+              href="/tarifs"
+              className="velifa-btn flex items-center gap-2 text-xs"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Passer Pro — 9€/mois
+            </Link>
+            <button
+              type="button"
+              onClick={() => setRateLimited(false)}
+              className="text-xs text-text-muted hover:text-text transition"
+            >
+              Réessayer demain
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Erreur générique ──────────────────────────────── */}
       {error && (
         <div className="text-sm text-score-poor bg-score-poor-bg border border-score-poor rounded-velifa-md px-4 py-3">
           {error}

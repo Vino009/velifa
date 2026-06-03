@@ -3,6 +3,8 @@ import {
   Logger,
   BadRequestException,
   NotFoundException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
@@ -14,7 +16,9 @@ import { validateUrl, hashUrl } from '../common/validators/url.validator';
 import { BULL_ANALYSES_QUEUE } from '../redis/redis.module';
 import axios from 'axios';
 
-const CACHE_TTL_HOURS = 24;
+const CACHE_TTL_HOURS  = 24;
+const FREE_USER_LIMIT  = 3;   // audits / 24h pour un utilisateur gratuit connecté
+const ANON_IP_LIMIT    = 1;   // audits / 24h pour un visiteur anonyme par IP
 
 @Injectable()
 export class AnalysesService {
@@ -36,13 +40,54 @@ export class AnalysesService {
     const normalizedUrl = validation.normalized!;
     const urlHash = hashUrl(normalizedUrl);
 
-    const cutoff = new Date(Date.now() - CACHE_TTL_HOURS * 3600 * 1000);
-    const cached = dto.force ? null : await this.db.findCachedAnalysis(urlHash, cutoff);
+    // ── Rate limiting ───────────────────────────────────────────────────
+    const cutoff24h = new Date(Date.now() - CACHE_TTL_HOURS * 3600 * 1000);
+
+    if (clerkUserId) {
+      // Utilisateur connecté → vérifie son plan
+      const userInfo = await this.db.findUserByClerkId(clerkUserId);
+      const isPremium = userInfo?.subscriptionPlan === 'pro'
+                     || userInfo?.subscriptionPlan === 'business';
+
+      if (!isPremium) {
+        // Plan gratuit → limite à FREE_USER_LIMIT audits / 24h
+        const recentCount = await this.db.countRecentAnalysesByUser(clerkUserId, cutoff24h);
+        if (recentCount >= FREE_USER_LIMIT) {
+          throw new HttpException(
+            {
+              statusCode: 429,
+              message:    'Limite quotidienne atteinte. Passez Pro pour des audits illimités.',
+              error:      'Too Many Requests',
+            },
+            HttpStatus.TOO_MANY_REQUESTS,
+          );
+        }
+      }
+      // Pro / Business → aucune limite
+    } else {
+      // Anonyme → limite à ANON_IP_LIMIT audit / 24h par IP
+      const maskedIp = this.maskIp(ipAddress);
+      const recentCount = await this.db.countRecentAnalysesByIp(maskedIp, cutoff24h);
+      if (recentCount >= ANON_IP_LIMIT) {
+        throw new HttpException(
+          {
+            statusCode: 429,
+            message:    'Limite atteinte. Créez un compte gratuit pour plus d\'audits.',
+            error:      'Too Many Requests',
+          },
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
+    }
+
+    // ── Cache check ─────────────────────────────────────────────────────
+    const cached = dto.force ? null : await this.db.findCachedAnalysis(urlHash, cutoff24h);
     if (cached) {
       this.logger.log(`Cache hit for ${normalizedUrl} → ${cached.id}`);
       return cached;
     }
 
+    // ── Create + queue ──────────────────────────────────────────────────
     const analysis = await this.db.createAnalysis({
       urlSite:     normalizedUrl,
       urlHash,
@@ -65,9 +110,7 @@ export class AnalysesService {
 
   async findById(id: string) {
     const analysis = await this.db.findAnalysisById(id);
-    if (!analysis) {
-      throw new NotFoundException(`Analysis ${id} not found`);
-    }
+    if (!analysis) throw new NotFoundException(`Analysis ${id} not found`);
     return analysis;
   }
 
@@ -97,28 +140,23 @@ export class AnalysesService {
       this.logger.warn('Turnstile bypassed in development mode');
       return;
     }
-
     try {
       const { data } = await axios.post(
         'https://challenges.cloudflare.com/turnstile/v0/siteverify',
         new URLSearchParams({ secret: secretKey, response: token, remoteip: ip }).toString(),
         { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, timeout: 5000 },
       );
-      if (!data.success) {
-        throw new BadRequestException('CAPTCHA verification failed');
-      }
+      if (!data.success) throw new BadRequestException('CAPTCHA verification failed');
     } catch (error: any) {
       if (error instanceof BadRequestException) throw error;
-      this.logger.warn(`Turnstile error (bypassing in dev): ${error.message}`);
+      this.logger.warn(`Turnstile error (bypassing): ${error.message}`);
     }
   }
 
   private maskIp(ip: string): string {
     if (!ip) return '';
     const parts = ip.split('.');
-    if (parts.length === 4) {
-      return `${parts[0]}.${parts[1]}.${parts[2]}.xxx`;
-    }
+    if (parts.length === 4) return `${parts[0]}.${parts[1]}.${parts[2]}.xxx`;
     return ip.substring(0, ip.length - 4) + 'xxxx';
   }
 }

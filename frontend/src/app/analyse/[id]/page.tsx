@@ -4,6 +4,7 @@ import { api } from '@/lib/api';
 import { getScoreColor, getScoreBg, getScoreLabel, formatMs, getCwvStatus, formatBytes } from '@/lib/utils';
 import { ExternalLink, MessageCircle, Globe, CheckCircle2, AlertCircle, XCircle, Zap } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import ReportProFeatures from '@/components/report/ReportProFeatures';
 
 export const revalidate = 0;
 
@@ -212,6 +213,8 @@ export default async function ReportPage({ params }: { params: { id: string } })
             </div>
           </div>
         )}
+        {/* ── Section Pro / Bannière upgrade ──────────────────────────── */}
+        <ReportProFeatures reportJson={analysis.reportJson} analysisId={analysis.id} />
       </div>
 
       {/* ── Sticky WhatsApp CTA ──────────────────────────────────────── */}
