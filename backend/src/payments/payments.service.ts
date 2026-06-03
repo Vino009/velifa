@@ -19,7 +19,28 @@ export class PaymentsService {
   constructor(
     private readonly config: ConfigService,
     private readonly db: DatabaseService,
-  ) {}
+  ) {
+    this.logConfig();
+  }
+
+  private logConfig(): void {
+    const mask = (v: string) =>
+      v.length > 4 ? v.slice(0, Math.ceil(v.length / 4)) + '****' : v ? '****' : '(vide)';
+
+    const storeId    = this.config.get<string>('lemonSqueezy.storeId', '');
+    const proVariant = this.config.get<string>('lemonSqueezy.proVariantId', '');
+    const bizVariant = this.config.get<string>('lemonSqueezy.businessVariantId', '');
+    const apiKey     = this.config.get<string>('lemonSqueezy.apiKey', '');
+    const secret     = this.config.get<string>('lemonSqueezy.webhookSecret', '');
+
+    this.logger.log(`LemonSqueezy config —`
+      + ` storeId=${mask(storeId)}`
+      + ` proVariant=${mask(proVariant)}`
+      + ` bizVariant=${mask(bizVariant)}`
+      + ` apiKey=${mask(apiKey)}`
+      + ` webhookSecret=${mask(secret)}`,
+    );
+  }
 
   // ── Checkout ──────────────────────────────────────────────────────────────
 

@@ -82,10 +82,20 @@ export default () => ({
   },
   sentry: { dsn: process.env.SENTRY_DSN ?? '' },
   lemonSqueezy: {
-    apiKey:             process.env.LEMONSQUEEZY_API_KEY ?? '',
-    storeId:            process.env.LEMONSQUEEZY_STORE_ID ?? '',
-    proVariantId:       process.env.LEMONSQUEEZY_PRO_VARIANT_ID ?? '',
-    businessVariantId:  process.env.LEMONSQUEEZY_BUSINESS_VARIANT_ID ?? '',
-    webhookSecret:      process.env.LEMONSQUEEZY_WEBHOOK_SECRET ?? '',
+    apiKey:
+      process.env.LEMONSQUEEZY_API_KEY ??
+      process.env.NEXT_PUBLIC_LEMONSQUEEZY_API_KEY ?? '',
+    storeId:
+      process.env.LEMONSQUEEZY_STORE_ID ??
+      process.env.NEXT_PUBLIC_LEMONSQUEEZY_STORE_ID ?? '',
+    proVariantId:
+      process.env.LEMONSQUEEZY_PRO_VARIANT_ID ??
+      process.env.NEXT_PUBLIC_LEMONSQUEEZY_PRO_VARIANT_ID ?? '',
+    businessVariantId:
+      process.env.LEMONSQUEEZY_BUSINESS_VARIANT_ID ??
+      process.env.NEXT_PUBLIC_LEMONSQUEEZY_BUSINESS_VARIANT_ID ?? '',
+    webhookSecret:
+      process.env.LEMONSQUEEZY_WEBHOOK_SECRET ??
+      process.env.NEXT_PUBLIC_LEMONSQUEEZY_WEBHOOK_SECRET ?? '',
   },
 });
