@@ -22,8 +22,14 @@ async function bootstrap() {
     contentSecurityPolicy: nodeEnv === 'production',
   }));
 
+  // Origines autorisées : frontendUrl (APP_URL ou FRONTEND_URL) + localhost:3000 dev
+  const allowedOrigins = Array.from(new Set([
+    frontendUrl,
+    'http://localhost:3000',
+    'http://localhost:3001',
+  ]));
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:3004', 'http://localhost:3005'],
+    origin: allowedOrigins,
     methods: ['GET', 'POST'],
     credentials: true,
   });

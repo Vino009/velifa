@@ -15,6 +15,7 @@ class EnvironmentVariables {
   PORT: number = 3001;
 
   @IsString() FRONTEND_URL: string = 'http://localhost:3000';
+  @IsOptional() @IsString() APP_URL?: string;
   @IsString() DATABASE_URL: string = '';
   @IsString() REDIS_URL: string = 'redis://localhost:6379';
   @IsString() PAGESPEED_API_KEY: string = '';
@@ -53,7 +54,11 @@ export function validate(config: Record<string, unknown>) {
 export default () => ({
   nodeEnv: process.env.NODE_ENV ?? 'development',
   port: parseInt(process.env.PORT ?? '3001', 10),
-  frontendUrl: process.env.FRONTEND_URL ?? 'http://localhost:3000',
+  // APP_URL prend la priorité sur FRONTEND_URL (plus explicite en prod)
+  frontendUrl:
+    process.env.APP_URL ??
+    process.env.FRONTEND_URL ??
+    'http://localhost:3000',
   database:    { url: process.env.DATABASE_URL ?? '' },
   redis:       { url: process.env.REDIS_URL ?? 'redis://localhost:6379' },
   pagespeed:   { apiKey: process.env.PAGESPEED_API_KEY ?? '' },
