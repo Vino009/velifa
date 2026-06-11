@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { Zap, Menu, X, Sparkles } from 'lucide-react';
+import { Zap, Menu, X, Sparkles, Gem } from 'lucide-react';
 import { UserButton, useAuth } from '@clerk/nextjs';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useSubscription } from '@/context/SubscriptionContext';
@@ -14,9 +14,25 @@ const navLinks: Array<{ label: string; href: '/' | '/fonctionnalites' | '/tarifs
   { label: 'Contact',         href: '/contact' },
 ];
 
-/** Petit badge doré inline (Pro / Business) — null = rien affiché */
+/** Badge inline plan — argent/platine pour Business, doré pour Pro */
 function HeaderPlanBadge({ plan }: { plan: 'pro' | 'business' | null }) {
   if (!plan) return null;
+  if (plan === 'business') {
+    return (
+      <span
+        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase leading-none"
+        style={{
+          background: 'linear-gradient(135deg, rgba(232,232,232,0.18) 0%, rgba(180,180,180,0.10) 100%)',
+          border: '1px solid rgba(200,200,200,0.45)',
+          color: '#E8E8E8',
+          boxShadow: '0 1px 6px rgba(200,200,200,0.12)',
+        }}
+      >
+        <Gem className="w-2.5 h-2.5" />
+        Business
+      </span>
+    );
+  }
   return (
     <span
       className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase leading-none"
@@ -27,7 +43,7 @@ function HeaderPlanBadge({ plan }: { plan: 'pro' | 'business' | null }) {
       }}
     >
       <Sparkles className="w-2.5 h-2.5" />
-      {plan === 'business' ? 'Biz' : 'Pro'}
+      Pro
     </span>
   );
 }

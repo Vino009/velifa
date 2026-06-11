@@ -4,7 +4,7 @@ import './globals.css';
 import '@/styles/velifa-design-system.css';
 import Providers from '@/components/Providers';
 import ClientLayout from '@/components/layout/ClientLayout';
-import Footer from '@/components/layout/Footer';
+import ClientFooter from '@/components/layout/ClientFooter';
 
 const orbitron = Orbitron({
   subsets: ['latin'],
@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="antialiased">
         <Providers>
           <ClientLayout>{children}</ClientLayout>
-          <Footer />
+          <ClientFooter />
         </Providers>
       </body>
     </html>

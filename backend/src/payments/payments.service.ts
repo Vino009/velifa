@@ -42,7 +42,99 @@ export class PaymentsService {
     );
   }
 
-  // ── Checkout ──────────────────────────────────────────────────────────────
+  // ── Checkout ou Upgrade ───────────────────────────────────────────────────
+
+  /**
+   * Point d'entrée principal :
+   * - Si l'utilisateur a déjà un abonnement actif sur un plan différent
+   *   → upgrade via PATCH Lemon Squeezy (pas de nouveau checkout)
+   * - Sinon → crée un nouveau checkout Lemon Squeezy
+   */
+  async createCheckoutOrUpgrade(
+    plan: 'pro' | 'business',
+    clerkUserId: string,
+    userEmail?: string,
+  ): Promise<{ checkoutUrl: string | null; upgraded: boolean }> {
+    const user = await this.db.findUserByClerkId(clerkUserId);
+
+    const hasActiveSub =
+      user?.subscriptionStatus === 'active' &&
+      user?.lemonSubscriptionId;
+
+    const isDifferentPlan = user?.subscriptionPlan !== plan;
+
+    if (hasActiveSub && isDifferentPlan) {
+      // Upgrade : modifier le variant de l'abonnement existant
+      await this.upgradeSubscriptionVariant(
+        user!.lemonSubscriptionId!,
+        plan,
+        clerkUserId,
+      );
+      return { checkoutUrl: null, upgraded: true };
+    }
+
+    // Pas d'abonnement actif ou même plan → nouveau checkout
+    const url = await this.createCheckoutUrl(plan, clerkUserId, userEmail);
+    return { checkoutUrl: url, upgraded: false };
+  }
+
+  /**
+   * PATCH /v1/subscriptions/{id}
+   * Change le variant_id d'un abonnement Lemon Squeezy existant.
+   */
+  private async upgradeSubscriptionVariant(
+    lemonSubId: string,
+    plan: 'pro' | 'business',
+    clerkUserId: string,
+  ): Promise<void> {
+    const apiKey    = this.config.get<string>('lemonSqueezy.apiKey', '');
+    const variantId = plan === 'pro'
+      ? this.config.get<string>('lemonSqueezy.proVariantId', '')
+      : this.config.get<string>('lemonSqueezy.businessVariantId', '');
+
+    if (!apiKey || !variantId) {
+      throw new BadRequestException('Configuration paiement incomplète pour l\'upgrade');
+    }
+
+    try {
+      await axios.patch(
+        `${LS_API}/subscriptions/${lemonSubId}`,
+        {
+          data: {
+            type:       'subscriptions',
+            id:         lemonSubId,
+            attributes: { variant_id: Number(variantId) },
+          },
+        },
+        {
+          headers: {
+            Authorization:  `Bearer ${apiKey}`,
+            Accept:         'application/vnd.api+json',
+            'Content-Type': 'application/vnd.api+json',
+          },
+        },
+      );
+
+      // Mise à jour immédiate en BDD (le webhook confirmera)
+      await this.db.upsertUser({
+        clerkUserId,
+        subscriptionPlan:    plan,
+        subscriptionStatus:  'active',
+        lemonSubscriptionId: lemonSubId,
+      });
+
+      this.logger.log(
+        `[upgrade] user=${clerkUserId} subscription=${lemonSubId} → plan=${plan}`,
+      );
+    } catch (err: any) {
+      if (err instanceof BadRequestException) throw err;
+      const detail = err?.response?.data ?? err?.message;
+      this.logger.error('Lemon Squeezy upgrade error', detail);
+      throw new BadRequestException('Impossible de mettre à niveau l\'abonnement');
+    }
+  }
+
+  // ── Checkout (nouveau) ────────────────────────────────────────────────────
 
   async createCheckoutUrl(
     plan: 'pro' | 'business',

@@ -9,18 +9,21 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth, useUser } from '@clerk/nextjs';
 
 // ── Formulaire d'audit ───────────────────────────────────────────────────────
 function AuditForm() {
   const router = useRouter();
   const { getToken, isSignedIn } = useAuth();
+  const { user } = useUser();
   const [url, setUrl]     = useState('');
-  const [email, setEmail] = useState('');
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState('');
   const [rateLimited, setRateLimited] = useState(false);
   const [cachedInfo, setCachedInfo]   = useState<{ id: string } | null>(null);
+
+  // Email récupéré silencieusement depuis Clerk (non affiché dans le form)
+  const clerkEmail = user?.primaryEmailAddress?.emailAddress ?? undefined;
 
   async function handleSubmit(e: React.FormEvent, force = false) {
     e.preventDefault();
@@ -31,7 +34,11 @@ function AuditForm() {
     try {
       const authToken = isSignedIn ? await getToken() : undefined;
       const res = await api.createAnalysis({
-        url, email, cfTurnstileToken: 'dev-bypass', locale: 'fr', force,
+        url,
+        email: clerkEmail,   // undefined si non connecté → modal email après
+        cfTurnstileToken: 'dev-bypass',
+        locale: 'fr',
+        force,
       }, authToken);
       const { id, cached } = res.data;
       if (cached) {
@@ -53,7 +60,6 @@ function AuditForm() {
   function handleDismiss() {
     setCachedInfo(null);
     setUrl('');
-    setEmail('');
   }
 
   return (
@@ -123,22 +129,6 @@ function AuditForm() {
           className="w-full px-4 py-3 border border-border rounded-velifa-md text-text bg-surface placeholder:text-subtle focus:outline-none focus:ring-2 focus:ring-accent-ring focus:border-transparent transition disabled:opacity-50"
         />
       </div>
-      <div>
-        <label className="block text-sm font-medium text-text mb-1.5">
-          Votre email
-          <span className="text-text-muted font-normal ml-1">(pour recevoir le rapport)</span>
-        </label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="vous@exemple.com"
-          required
-          disabled={loading}
-          className="w-full px-4 py-3 border border-border rounded-velifa-md text-text bg-surface placeholder:text-subtle focus:outline-none focus:ring-2 focus:ring-accent-ring focus:border-transparent transition disabled:opacity-50"
-        />
-      </div>
-
       {/* ── Erreur 429 : message incitatif doux ───────────── */}
       {rateLimited && (
         <div

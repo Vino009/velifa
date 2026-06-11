@@ -91,6 +91,23 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
       `);
       this.logger.log('Migration: users table ready');
+
+      // Suspension columns
+      await this.pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS suspended BOOLEAN NOT NULL DEFAULT FALSE`).catch(() => {});
+      await this.pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS suspended_at DATETIME NULL`).catch(() => {});
+
+      // Admin notifications table
+      await this.pool.query(`
+        CREATE TABLE IF NOT EXISTS admin_notifications (
+          id         VARCHAR(36)   NOT NULL,
+          type       VARCHAR(50)   NOT NULL DEFAULT 'info',
+          message    TEXT          NOT NULL,
+          read_status BOOLEAN      NOT NULL DEFAULT FALSE,
+          created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY (id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+      `);
+      this.logger.log('Migration: admin_notifications table ready');
     } catch (err: any) {
       this.logger.error('Migration failed', err?.message);
     }
@@ -268,6 +285,14 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     return Number(rows[0]?.cnt ?? 0);
   }
 
+  async isUserSuspended(clerkUserId: string): Promise<boolean> {
+    const [rows] = await this.pool.query<mysql.RowDataPacket[]>(
+      `SELECT suspended FROM users WHERE clerk_user_id = ? LIMIT 1`,
+      [clerkUserId],
+    );
+    return rows[0]?.suspended === 1 || rows[0]?.suspended === true;
+  }
+
   async countRecentAnalysesByIp(ipAddress: string, cutoff: Date): Promise<number> {
     const [rows] = await this.pool.query<mysql.RowDataPacket[]>(
       `SELECT COUNT(*) AS cnt FROM analyses
@@ -303,17 +328,20 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   }
 
   async findUserByClerkId(clerkUserId: string): Promise<{
-    subscriptionPlan: string | null;
-    subscriptionStatus: string | null;
+    subscriptionPlan:    string | null;
+    subscriptionStatus:  string | null;
+    lemonSubscriptionId: string | null;
   } | null> {
     const [rows] = await this.pool.query<mysql.RowDataPacket[]>(
-      `SELECT subscription_plan, subscription_status FROM users WHERE clerk_user_id = ? LIMIT 1`,
+      `SELECT subscription_plan, subscription_status, lemon_subscription_id
+       FROM users WHERE clerk_user_id = ? LIMIT 1`,
       [clerkUserId],
     );
     if (!rows[0]) return null;
     return {
-      subscriptionPlan:   rows[0].subscription_plan   ?? null,
-      subscriptionStatus: rows[0].subscription_status ?? null,
+      subscriptionPlan:    rows[0].subscription_plan    ?? null,
+      subscriptionStatus:  rows[0].subscription_status  ?? null,
+      lemonSubscriptionId: rows[0].lemon_subscription_id ?? null,
     };
   }
 

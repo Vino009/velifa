@@ -5,6 +5,7 @@ import { getScoreColor, getScoreBg, getScoreLabel, formatMs, getCwvStatus, forma
 import { ExternalLink, MessageCircle, Globe, CheckCircle2, AlertCircle, XCircle, Zap } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import ReportProFeatures from '@/components/report/ReportProFeatures';
+import EmailReportModal from '@/components/report/EmailReportModal';
 
 export const revalidate = 0;
 
@@ -231,6 +232,15 @@ export default async function ReportPage({ params }: { params: { id: string } })
           </a>
         </div>
       )}
+      {/* Modal email — Client Component, s'affiche 1.5s après le chargement */}
+      <EmailReportModal
+        analysisId={params.id}
+        siteUrl={analysis.urlSite}
+        score={score}
+        reportUrl={typeof process !== 'undefined' && process.env.NEXT_PUBLIC_APP_URL
+          ? `${process.env.NEXT_PUBLIC_APP_URL}/analyse/${params.id}`
+          : `/analyse/${params.id}`}
+      />
     </main>
   );
 }

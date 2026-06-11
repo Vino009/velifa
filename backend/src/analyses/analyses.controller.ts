@@ -13,11 +13,12 @@ import {
   Headers,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottlerGuard, SkipThrottle } from '@nestjs/throttler';
 import { Observable, map } from 'rxjs';
 import { AnalysesService } from './analyses.service';
 import { SseService } from '../sse/sse.service';
 import { CreateAnalysisDto } from './dto/create-analysis.dto';
+import { SendReportEmailDto } from './dto/send-report-email.dto';
 import { ClientIp } from '../common/decorators/client-ip.decorator';
 import { verifyClerkToken } from '../common/auth/clerk-auth.service';
 
@@ -57,6 +58,7 @@ export class AnalysesController {
    * Requires a valid Clerk Bearer token (401 otherwise).
    */
   @Get('mine')
+  @SkipThrottle()           // Route read-only de dashboard — pas de risque d'abus
   async findMine(@Headers('authorization') authHeader: string | undefined) {
     const clerkUserId = await verifyClerkToken(authHeader);
     if (!clerkUserId) {
@@ -72,6 +74,22 @@ export class AnalysesController {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.analysesService.findById(id);
+  }
+
+  /**
+   * POST /analyses/:id/send-email
+   * Envoie le rapport existant par email sans relancer l'audit.
+   * Pas de throttle — action utilisateur explicite unique.
+   */
+  @Post(':id/send-email')
+  @SkipThrottle()
+  @HttpCode(HttpStatus.OK)
+  async sendEmail(
+    @Param('id') id: string,
+    @Body() dto: SendReportEmailDto,
+  ) {
+    await this.analysesService.sendReportForAnalysis(id, dto.email);
+    return { sent: true };
   }
 
   /**

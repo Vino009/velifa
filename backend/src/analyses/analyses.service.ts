@@ -14,6 +14,7 @@ import { CreateAnalysisDto } from './dto/create-analysis.dto';
 import { AnalysisJobPayload } from './analyses.worker';
 import { validateUrl, hashUrl } from '../common/validators/url.validator';
 import { BULL_ANALYSES_QUEUE } from '../redis/redis.module';
+import { BrevoService } from '../brevo/brevo.service';
 import axios from 'axios';
 
 const CACHE_TTL_HOURS  = 24;
@@ -28,6 +29,7 @@ export class AnalysesService {
     private readonly db: DatabaseService,
     @InjectQueue(BULL_ANALYSES_QUEUE) private readonly queue: Queue<AnalysisJobPayload>,
     private readonly config: ConfigService,
+    private readonly brevo: BrevoService,
   ) {}
 
   async create(dto: CreateAnalysisDto, ipAddress: string, clerkUserId: string | null = null) {
@@ -44,6 +46,14 @@ export class AnalysesService {
     const cutoff24h = new Date(Date.now() - CACHE_TTL_HOURS * 3600 * 1000);
 
     if (clerkUserId) {
+      // Vérifie si le compte est suspendu
+      const isSuspended = await this.db.isUserSuspended(clerkUserId);
+      if (isSuspended) {
+        throw new HttpException(
+          { statusCode: 403, message: 'Compte suspendu. Contactez le support.', error: 'Forbidden' },
+          HttpStatus.FORBIDDEN,
+        );
+      }
       // Utilisateur connecté → vérifie son plan
       const userInfo = await this.db.findUserByClerkId(clerkUserId);
       const isPremium = userInfo?.subscriptionPlan === 'pro'
@@ -88,10 +98,12 @@ export class AnalysesService {
     }
 
     // ── Create + queue ──────────────────────────────────────────────────
+    const emailForJob = dto.email ?? '';   // worker n'envoie pas si vide
+
     const analysis = await this.db.createAnalysis({
       urlSite:     normalizedUrl,
       urlHash,
-      email:       dto.email,
+      email:       emailForJob,
       locale:      dto.locale ?? 'fr',
       source:      'web',
       clerkUserId: clerkUserId,
@@ -100,7 +112,7 @@ export class AnalysesService {
 
     await this.queue.add(
       'run',
-      { analysisId: analysis.id, url: normalizedUrl, email: dto.email, locale: dto.locale ?? 'fr' },
+      { analysisId: analysis.id, url: normalizedUrl, email: emailForJob, locale: dto.locale ?? 'fr' },
       { jobId: analysis.id, timeout: 60_000 },
     );
 
@@ -151,6 +163,35 @@ export class AnalysesService {
       if (error instanceof BadRequestException) throw error;
       this.logger.warn(`Turnstile error (bypassing): ${error.message}`);
     }
+  }
+
+  /**
+   * POST /analyses/:id/send-email
+   * Renvoie le rapport existant par email (sans relancer l'audit).
+   */
+  async sendReportForAnalysis(id: string, toEmail: string): Promise<void> {
+    const analysis = await this.db.findAnalysisById(id);
+    if (!analysis) throw new NotFoundException(`Analysis ${id} not found`);
+    if (analysis.status !== 'completed') {
+      throw new BadRequestException('Le rapport n\'est pas encore disponible.');
+    }
+
+    const frontendUrl = this.config.get<string>('frontendUrl', 'http://localhost:3000');
+    const reportUrl   = `${frontendUrl}/analyse/${id}`;
+
+    await this.brevo.sendReportEmail({
+      toEmail,
+      urlSite:          analysis.urlSite,
+      scorePerformance: analysis.scorePerformance ?? 0,
+      lcp:              analysis.lcpMobile,
+      cls:              analysis.clsMobile,
+      tbt:              analysis.tbtMobile,
+      reportUrl,
+      whatsappUrl:      analysis.whatsappLink ?? reportUrl,
+      screenshotUrl:    analysis.screenshotUrl,
+    });
+
+    this.logger.log(`Report email sent for ${id} → ${toEmail}`);
   }
 
   private maskIp(ip: string): string {

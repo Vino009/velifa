@@ -125,7 +125,7 @@ export class BrevoService {
       ? `<tr>
     <td style="padding: 24px 0 0 0; text-align: center;">
       <p style="margin: 0 0 12px 0; font-size: 12px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase;">
-        📸 &nbsp;Aperçu de votre site
+        <img src="https://img.icons8.com/color/20/camera.png" width="14" height="14" alt="" style="vertical-align: middle; border: 0; display: inline-block; margin-right: 6px;" />&nbsp;Aperçu de votre site
       </p>
       <img src="${data.screenshotUrl}" alt="Capture d'écran"
            width="560"
@@ -179,7 +179,7 @@ export class BrevoService {
         <tr>
           <td style="background-color: ${card}; border: 1px solid ${border}; border-radius: 10px; padding: 36px 32px; text-align: center;">
             <p style="margin: 0 0 10px 0; font-size: 12px; color: ${sub}; letter-spacing: 2px; text-transform: uppercase;">
-              🎯 &nbsp;Score global
+              <img src="https://img.icons8.com/color/20/goal--v1.png" width="16" height="16" alt="" style="vertical-align: middle; border: 0; display: inline-block; margin-right: 6px;" />&nbsp;Score global
             </p>
             <p style="margin: 0 0 8px 0; font-size: 76px; font-weight: bold; line-height: 1; color: ${data.scoreHex};">${data.scoreGlobal}</p>
             <p style="margin: 0; font-size: 15px; font-weight: bold; color: ${data.scoreHex};">${data.scoreLabel}</p>
@@ -197,7 +197,7 @@ export class BrevoService {
         <tr>
           <td colspan="3" style="padding: 16px 20px 14px 20px; border-bottom: 1px solid ${border};">
             <p style="margin: 0; font-size: 12px; color: ${sub}; letter-spacing: 2px; text-transform: uppercase; text-align: center;">
-              📊 &nbsp;Core Web Vitals
+              <img src="https://img.icons8.com/color/20/combo-chart--v1.png" width="16" height="16" alt="" style="vertical-align: middle; border: 0; display: inline-block; margin-right: 6px;" />&nbsp;Core Web Vitals
             </p>
           </td>
         </tr>
@@ -205,19 +205,19 @@ export class BrevoService {
         <tr>
           <!-- LCP -->
           <td width="33%" style="padding: 22px 8px 20px 8px; text-align: center; border-right: 1px solid ${border};">
-            <p style="margin: 0 0 6px 0; font-size: 10px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase;">⚡ LCP</p>
+            <p style="margin: 0 0 6px 0; font-size: 10px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase;"><img src="https://img.icons8.com/color/16/flash-on.png" width="12" height="12" alt="" style="vertical-align: middle; border: 0; display: inline-block; margin-right: 4px;" /> LCP</p>
             <p style="margin: 0; font-size: 24px; font-weight: bold; color: ${text};">${data.lcp}</p>
             <p style="margin: 6px 0 0 0; font-size: 10px; color: ${dimmed};">Chargement</p>
           </td>
           <!-- CLS -->
           <td width="33%" style="padding: 22px 8px 20px 8px; text-align: center; border-right: 1px solid ${border};">
-            <p style="margin: 0 0 6px 0; font-size: 10px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase;">📐 CLS</p>
+            <p style="margin: 0 0 6px 0; font-size: 10px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase;"><img src="https://img.icons8.com/color/16/resize-four-directions.png" width="12" height="12" alt="" style="vertical-align: middle; border: 0; display: inline-block; margin-right: 4px;" /> CLS</p>
             <p style="margin: 0; font-size: 24px; font-weight: bold; color: ${text};">${data.cls}</p>
             <p style="margin: 6px 0 0 0; font-size: 10px; color: ${dimmed};">Stabilité visuelle</p>
           </td>
           <!-- TBT -->
           <td width="34%" style="padding: 22px 8px 20px 8px; text-align: center;">
-            <p style="margin: 0 0 6px 0; font-size: 10px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase;">⏱ TBT</p>
+            <p style="margin: 0 0 6px 0; font-size: 10px; color: ${sub}; letter-spacing: 1px; text-transform: uppercase;"><img src="https://img.icons8.com/color/16/stopwatch.png" width="12" height="12" alt="" style="vertical-align: middle; border: 0; display: inline-block; margin-right: 4px;" /> TBT</p>
             <p style="margin: 0; font-size: 24px; font-weight: bold; color: ${text};">${data.tbt}</p>
             <p style="margin: 6px 0 0 0; font-size: 10px; color: ${dimmed};">Temps bloquant</p>
           </td>
@@ -249,36 +249,65 @@ export class BrevoService {
   </tr>
 
   <!-- ── SIGNATURE SOCIAL ────────────────────────────────── -->
+  <!--
+    PNG colorés https:// via img.icons8.com — couleurs officielles de chaque marque.
+    Reconnaissables immédiatement. Compatible Gmail + Outlook + Apple Mail.
+    Table HTML pour centrage cross-client.
+  -->
   <tr>
     <td style="padding: 28px 0 0 0; text-align: center;">
       <p style="margin: 0 0 20px 0; font-size: 12px; color: ${sub}; letter-spacing: 2px; text-transform: uppercase;">
         Suivez Velifa
       </p>
-      <div style="display: flex; justify-content: center; align-items: center; gap: 28px;">
-        <!-- Twitter / X -->
-        <a href="https://twitter.com/velifa_io" target="_blank" rel="noopener noreferrer"
-           style="font-size: 14px; color: ${gold2}; text-decoration: none; font-weight: bold; letter-spacing: 1px;">
-          X
-        </a>
-        <span style="color: ${border}; font-size: 14px;">·</span>
-        <!-- LinkedIn -->
-        <a href="https://linkedin.com/company/velifa" target="_blank" rel="noopener noreferrer"
-           style="font-size: 14px; color: ${gold2}; text-decoration: none; font-weight: bold; letter-spacing: 1px;">
-          LinkedIn
-        </a>
-        <span style="color: ${border}; font-size: 14px;">·</span>
-        <!-- Facebook -->
-        <a href="https://facebook.com/velifa.io" target="_blank" rel="noopener noreferrer"
-           style="font-size: 14px; color: ${gold2}; text-decoration: none; font-weight: bold; letter-spacing: 1px;">
-          Facebook
-        </a>
-        <span style="color: ${border}; font-size: 14px;">·</span>
-        <!-- Instagram -->
-        <a href="https://instagram.com/velifa_io" target="_blank" rel="noopener noreferrer"
-           style="font-size: 14px; color: ${gold2}; text-decoration: none; font-weight: bold; letter-spacing: 1px;">
-          Instagram
-        </a>
-      </div>
+      <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
+        <tr>
+
+          <!-- X / Twitter — noir officiel -->
+          <td style="padding: 0 6px;" align="center">
+            <a href="https://twitter.com/velifa_io" target="_blank" rel="noopener noreferrer"
+               style="display: inline-block; text-decoration: none;">
+              <img src="https://img.icons8.com/color/48/twitterx--v2.png"
+                   width="40" height="40" alt="X (Twitter)"
+                   style="display: block; border: 0;" />
+            </a>
+            <p style="margin: 6px 0 0 0; font-size: 10px; color: ${sub};">X</p>
+          </td>
+
+          <!-- LinkedIn — bleu #0A66C2 -->
+          <td style="padding: 0 6px;" align="center">
+            <a href="https://linkedin.com/company/velifa" target="_blank" rel="noopener noreferrer"
+               style="display: inline-block; text-decoration: none;">
+              <img src="https://img.icons8.com/color/48/linkedin.png"
+                   width="40" height="40" alt="LinkedIn"
+                   style="display: block; border: 0;" />
+            </a>
+            <p style="margin: 6px 0 0 0; font-size: 10px; color: ${sub};">LinkedIn</p>
+          </td>
+
+          <!-- Facebook — bleu #1877F2 -->
+          <td style="padding: 0 6px;" align="center">
+            <a href="https://facebook.com/velifa.io" target="_blank" rel="noopener noreferrer"
+               style="display: inline-block; text-decoration: none;">
+              <img src="https://img.icons8.com/color/48/facebook-new.png"
+                   width="40" height="40" alt="Facebook"
+                   style="display: block; border: 0;" />
+            </a>
+            <p style="margin: 6px 0 0 0; font-size: 10px; color: ${sub};">Facebook</p>
+          </td>
+
+          <!-- Instagram — dégradé officiel -->
+          <td style="padding: 0 6px;" align="center">
+            <a href="https://instagram.com/velifa_io" target="_blank" rel="noopener noreferrer"
+               style="display: inline-block; text-decoration: none;">
+              <img src="https://img.icons8.com/color/48/instagram-new--v1.png"
+                   width="40" height="40" alt="Instagram"
+                   style="display: block; border: 0;" />
+            </a>
+            <p style="margin: 6px 0 0 0; font-size: 10px; color: ${sub};">Instagram</p>
+          </td>
+
+        </tr>
+      </table>
     </td>
   </tr>
 

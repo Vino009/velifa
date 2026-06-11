@@ -11,7 +11,7 @@ import {
   Logger,
   UseGuards,
 } from '@nestjs/common';
-import { ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottlerGuard, SkipThrottle } from '@nestjs/throttler';
 import { RawBodyRequest } from '@nestjs/common';
 import { Request } from 'express';
 import { PaymentsService } from './payments.service';
@@ -30,6 +30,7 @@ export class PaymentsController {
    * Retourne plan: null si l'utilisateur n'a pas encore de ligne dans users.
    */
   @Get('me')
+  @SkipThrottle()           // Route read-only de dashboard — pas de risque d'abus
   @UseGuards(ThrottlerGuard)
   async getMyPlan(@Headers('authorization') authHeader: string | undefined) {
     const clerkUserId = await verifyClerkToken(authHeader);
@@ -56,13 +57,16 @@ export class PaymentsController {
       throw new UnauthorizedException('Vous devez être connecté pour souscrire à un plan');
     }
 
-    const checkoutUrl = await this.paymentsService.createCheckoutUrl(
+    const result = await this.paymentsService.createCheckoutOrUpgrade(
       dto.plan,
       clerkUserId,
       dto.email,
     );
 
-    return { checkoutUrl };
+    return {
+      checkoutUrl: result.checkoutUrl,
+      upgraded:    result.upgraded,
+    };
   }
 
   /**

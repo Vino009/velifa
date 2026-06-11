@@ -8,19 +8,23 @@ export class CreateAnalysisDto {
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   url: string = '';
 
+  /** Email optionnel — fourni si l'utilisateur est connecté ou l'a saisi */
+  @IsOptional()
   @IsEmail()
-  @IsNotEmpty()
   @MaxLength(255)
   @Transform(({ value }) =>
-    typeof value === 'string' ? value.trim().toLowerCase() : value,
+    typeof value === 'string' && value.trim()
+      ? value.trim().toLowerCase()
+      : undefined,
   )
-  email: string = '';
+  email?: string;
 
   @IsString()
   @IsNotEmpty()
   cfTurnstileToken: string = '';
 
   @IsString()
+  @IsOptional()
   locale?: string = 'fr';
 
   @IsOptional()
