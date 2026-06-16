@@ -3,8 +3,6 @@ import { Orbitron, Chakra_Petch, Sora } from 'next/font/google';
 import './globals.css';
 import '@/styles/velifa-design-system.css';
 import Providers from '@/components/Providers';
-import ClientLayout from '@/components/layout/ClientLayout';
-import ClientFooter from '@/components/layout/ClientFooter';
 
 const orbitron = Orbitron({
   subsets: ['latin'],
@@ -28,20 +26,18 @@ const sora = Sora({
 });
 
 export const metadata: Metadata = {
-  title: 'VELIFA — Audit de Performance Web',
-  description: 'Analysez la performance de votre site e-commerce en 30 secondes. Score, Core Web Vitals, rapport détaillé.',
-  keywords: ['audit performance', 'Velifa', 'Core Web Vitals', 'SEO', 'e-commerce'],
+  title: 'VELIFA — Web Performance Audit',
+  description: 'Analyze your website performance in 30 seconds. Score, Core Web Vitals, detailed report.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const fontVariables = [orbitron.variable, chakraPetch.variable, sora.variable].join(' ');
 
   return (
-    <html lang="fr" data-theme="dark" className={fontVariables}>
+    <html data-theme="dark" className={fontVariables}>
       <body className="antialiased">
         <Providers>
-          <ClientLayout>{children}</ClientLayout>
-          <ClientFooter />
+          {children}
         </Providers>
       </body>
     </html>

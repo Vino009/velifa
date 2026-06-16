@@ -1,0 +1,224 @@
+{
+  "meta": {
+    "title": "VELIFA — Audit de Performance Web",
+    "description": "Analysez la performance de votre site e-commerce en 30 secondes. Score, Core Web Vitals, rapport détaillé."
+  },
+  "nav": {
+    "home": "Accueil",
+    "features": "Fonctionnalités",
+    "pricing": "Tarifs",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "dashboard": "Mon espace",
+    "login": "Connexion"
+  },
+  "hero": {
+    "badge": "Analyse en 30 secondes · Rapport complet · 100% gratuit",
+    "title": "Auditez et optimisez la",
+    "titleHighlight": "performance de votre site",
+    "subtitle": "Obtenez votre score de performance complet, Core Web Vitals, et un plan d'action prioritaire. Aucune connaissance technique requise.",
+    "inputPlaceholder": "https://votresite.com",
+    "analyzeButton": "Analyser mon site",
+    "analyzing": "Analyse en cours...",
+    "freeNote": "Analyse gratuite · Aucune inscription requise"
+  },
+  "trust": {
+    "noData": "Aucune donnée revendue",
+    "fast": "Résultat en moins de 30s",
+    "powered": "Propulsé par Velifa",
+    "compatible": "Compatible tout site public"
+  },
+  "features": {
+    "sectionTitle": "Ce que Velifa mesure pour vous",
+    "performanceScore": {
+      "title": "Score de performance complet",
+      "description": "Score global de 0 à 100",
+      "detail": "Velifa analyse votre score de performance complet : vitesse de chargement, stabilité visuelle, interactivité. Chaque métrique est expliquée clairement avec des suggestions d'amélioration concrètes."
+    },
+    "coreWebVitals": {
+      "title": "Core Web Vitals mesurés",
+      "description": "LCP, CLS, FID — les métriques essentielles de Google",
+      "detail": "Nous mesurons les 3 Core Web Vitals exigés par Google : LCP (chargement), CLS (stabilité visuelle), TBT/FID (interactivité). Ces métriques impactent directement votre positionnement SEO."
+    },
+    "emailReport": {
+      "title": "Rapport par email",
+      "description": "Rapport PDF détaillé dans votre boîte mail",
+      "detail": "Recevez un rapport complet par email avec tous vos scores, les problèmes identifiés et une liste priorisée d'améliorations. Partageable avec votre équipe de développement."
+    },
+    "screenshot": {
+      "title": "Capture d'écran intégrée",
+      "description": "Capture visuelle de votre site",
+      "detail": "Chaque analyse inclut une capture d'écran automatique de votre site tel que vu par les robots Google. Identifiez les problèmes visuels et suivez l'apparence de votre site dans le temps."
+    }
+  },
+  "keyFeatures": {
+    "detailedScore": {
+      "title": "Score détaillé",
+      "desc": "Performance, SEO, accessibilité et bonnes pratiques"
+    },
+    "emailReport": {
+      "title": "Rapport par email",
+      "desc": "Recevez votre rapport complet directement par email"
+    },
+    "whatsapp": {
+      "title": "Accompagnement WhatsApp",
+      "desc": "Support personnalisé pour comprendre et améliorer vos résultats"
+    },
+    "dataProtected": {
+      "title": "Données protégées",
+      "desc": "Vos données ne sont jamais revendues ni partagées avec des tiers"
+    }
+  },
+  "howItWorks": {
+    "title": "Comment ça marche ?",
+    "step1": {
+      "num": "01",
+      "title": "Entrez l'URL",
+      "desc": "Saisissez l'adresse du site à analyser — page d'accueil, page produit, ou n'importe quelle URL publique."
+    },
+    "step2": {
+      "num": "02",
+      "title": "Analyse Velifa",
+      "desc": "Velifa lance les tests avec Google Lighthouse et collecte toutes les métriques de performance."
+    },
+    "step3": {
+      "num": "03",
+      "title": "Rapport par email",
+      "desc": "Recevez un rapport complet avec vos scores, captures d'écran visuelles et recommandations d'amélioration."
+    }
+  },
+  "pricingPreview": {
+    "title": "Tarifs simples et transparents",
+    "free": {
+      "name": "Gratuit",
+      "price": "0",
+      "desc": "Découvrez la performance de votre site"
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "9",
+      "badge": "Populaire",
+      "desc": "Audit complet pour les professionnels"
+    },
+    "business": {
+      "name": "Business",
+      "price": "29",
+      "desc": "Gestion multi-sites et support prioritaire"
+    },
+    "perMonth": "/mois",
+    "seeAllPlans": "Voir tous les tarifs"
+  },
+  "cta": {
+    "title": "Prêt à booster votre site ?",
+    "subtitle": "Rejoignez des centaines de sites déjà optimisés avec Velifa",
+    "button": "Analyser mon site maintenant"
+  },
+  "footer": {
+    "tagline": "Performance Beyond Limits",
+    "product": "Produit",
+    "features": "Fonctionnalités",
+    "pricing": "Tarifs",
+    "faq": "FAQ",
+    "company": "Société",
+    "about": "À propos",
+    "contact": "Contact",
+    "legal": "Légal",
+    "legalNotice": "Mentions légales",
+    "privacy": "Confidentialité",
+    "copyright": "© 2026 Velifa. Tous droits réservés.",
+    "madeWith": "Fait avec ❤️ pour les professionnels du web"
+  },
+  "pricing": {
+    "title": "Tarifs simples et transparents",
+    "subtitle": "Commencez gratuitement, évoluez quand vous êtes prêt",
+    "free": {
+      "name": "Gratuit",
+      "price": "0",
+      "desc": "Parfait pour découvrir la performance de votre site",
+      "features": [
+        "1 audit par jour",
+        "Score de performance complet",
+        "Core Web Vitals",
+        "Rapport email basique"
+      ]
+    },
+    "pro": {
+      "name": "Pro",
+      "badge": "Le plus populaire",
+      "price": "9",
+      "desc": "Pour les professionnels qui veulent aller plus loin",
+      "features": [
+        "Audits illimités",
+        "Rapport détaillé complet",
+        "Suivi des tendances",
+        "Support WhatsApp",
+        "Export PDF"
+      ]
+    },
+    "business": {
+      "name": "Business",
+      "price": "29",
+      "desc": "Pour les agences et équipes multi-sites",
+      "features": [
+        "Tout ce qui est inclus dans Pro",
+        "Gestion multi-sites",
+        "Collaboration équipe",
+        "Accès API prioritaire",
+        "Support dédié"
+      ]
+    },
+    "perMonth": "/mois",
+    "startFree": "Commencer gratuitement",
+    "subscribe": "S'abonner",
+    "contactUs": "Nous contacter",
+    "mostPopular": "Le plus populaire"
+  },
+  "dashboard": {
+    "welcome": "Bienvenue",
+    "newAudit": "Nouvel audit",
+    "myAudits": "Mes audits",
+    "multiSite": "Multi-sites",
+    "settings": "Paramètres",
+    "billing": "Abonnement",
+    "support": "Support",
+    "logout": "Déconnexion",
+    "recentAudits": "Audits récents",
+    "noAudits": "Aucun audit pour l'instant",
+    "startFirst": "Lancez votre première analyse",
+    "score": "Score",
+    "date": "Date",
+    "status": "Statut",
+    "actions": "Actions",
+    "viewReport": "Voir le rapport",
+    "completed": "Terminé",
+    "pending": "En cours",
+    "failed": "Échoué"
+  },
+  "errors": {
+    "generic": "Une erreur est survenue. Veuillez réessayer.",
+    "urlInvalid": "Veuillez entrer une URL valide",
+    "rateLimit": "Vous avez atteint la limite journalière. Passez en Pro pour des audits illimités.",
+    "networkError": "Erreur réseau. Vérifiez votre connexion.",
+    "notFound": "Page non trouvée",
+    "unauthorized": "Vous devez être connecté pour accéder à cette page"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "yes": "Oui",
+    "no": "Non",
+    "or": "ou",
+    "and": "et",
+    "free": "Gratuit",
+    "pro": "Pro",
+    "business": "Business"
+  }
+}
