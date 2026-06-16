@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { LayoutDashboard, BarChart2, Globe, Plus, Settings, CreditCard, HelpCircle, LogOut, Menu, X, Sparkles, Gem } from 'lucide-react';
 import { useUser, useClerk } from '@clerk/nextjs';
 import { useSubscription } from '@/context/SubscriptionContext';
@@ -246,6 +247,14 @@ function SidebarContent({ onClose, onNewAudit }: { onClose?: () => void; onNewAu
           ))}
         </div>
       </nav>
+
+      {/* ── Séparateur ────────────────────────────────────────────── */}
+      <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '0 16px' }} />
+
+      {/* ── Sélecteur de langue ───────────────────────────────────── */}
+      <div style={{ padding: '8px 12px 4px' }}>
+        <LanguageSwitcher variant="sidebar" />
+      </div>
 
       {/* ── Séparateur ────────────────────────────────────────────── */}
       <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '0 16px' }} />

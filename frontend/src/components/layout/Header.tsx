@@ -5,6 +5,7 @@ import { Zap, Menu, X, Sparkles, Gem } from 'lucide-react';
 import { UserButton, useAuth } from '@clerk/nextjs';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useSubscription } from '@/context/SubscriptionContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const navLinks: Array<{ label: string; href: '/' | '/fonctionnalites' | '/tarifs' | '/faq' | '/contact' }> = [
   { label: 'Accueil',         href: '/' },
@@ -77,6 +78,7 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center gap-3 flex-shrink-0">
+            <LanguageSwitcher variant="header" />
             <ThemeToggle />
             {userId ? (
               <>
@@ -104,6 +106,7 @@ export default function Header() {
             <span className="velifa-wordmark text-sm">VELIFA</span>
           </Link>
           <div className="flex items-center gap-3">
+            <LanguageSwitcher variant="header" />
             <ThemeToggle />
             <button
               onClick={() => setMenuOpen(!menuOpen)}
