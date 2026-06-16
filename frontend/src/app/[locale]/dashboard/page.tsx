@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth, useUser } from '@clerk/nextjs';
+import { useTranslations } from 'next-intl';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer,
@@ -320,6 +321,7 @@ function EvolutionChart({ audits }: { audits: MyAudit[] }) {
 // ── Carte audit ────────────────────────────────────────────────────────────
 function AuditCard({ audit }: { audit: MyAudit }) {
   const bucket = getScoreBucket(audit.scorePerformance);
+  const t = useTranslations('dashboard');
   return (
     <div
       className="group flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-6 transition-all duration-300 hover:-translate-y-0.5"
@@ -366,7 +368,7 @@ function AuditCard({ audit }: { audit: MyAudit }) {
         className="velifa-btn flex items-center justify-center gap-2 sm:self-center shrink-0"
       >
         <FileSearch className="w-4 h-4" />
-        Voir le rapport
+        {t('viewReport')}
         <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
       </Link>
     </div>
@@ -1033,6 +1035,7 @@ export default function DashboardPage() {
   const { isSignedIn, isLoaded, getToken } = useAuth();
   const { user } = useUser();
   const { plan: subPlan, isActive: isPro, refresh: refreshPlan } = useSubscription();
+  const t = useTranslations('dashboard');
   const FREE_AUDIT_LIMIT = 3;
   const [audits, setAudits] = useState<MyAudit[] | null>(null);
   const [auditModalOpen, setAuditModalOpen] = useState(false);
@@ -1139,10 +1142,10 @@ export default function DashboardPage() {
                 <Sparkles className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--accent)' }} />
                 <div>
                   <p className="font-heading font-semibold text-sm" style={{ color: 'var(--accent)' }}>
-                    Bienvenue dans Velifa {subPlan === 'business' ? 'Business' : 'Pro'} !&nbsp;🎉
+                    {t('welcomePro', { plan: subPlan === 'business' ? 'Business' : 'Pro' })}
                   </p>
                   <p className="text-text-muted text-xs mt-0.5">
-                    Votre abonnement est actif. Profitez de toutes vos fonctionnalités.
+                    {t('welcomeProDesc')}
                   </p>
                 </div>
               </div>
@@ -1170,10 +1173,10 @@ export default function DashboardPage() {
                 <Gem className="w-5 h-5 flex-shrink-0" style={{ color: '#E8E8E8' }} strokeWidth={1.75} />
                 <div>
                   <p className="font-heading font-semibold text-sm" style={{ color: '#E8E8E8' }}>
-                    Espace Business — Accès illimité
+                    {t('businessAccess')}
                   </p>
                   <p className="text-text-muted text-xs mt-0.5">
-                    Multi-sites, alertes de performance et accès API inclus.
+                    {t('businessDesc')}
                   </p>
                 </div>
               </div>
@@ -1193,15 +1196,15 @@ export default function DashboardPage() {
           {/* ── En-tête personnalisé ────────────────────────────────── */}
           <div className="fade-up flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-10 sm:mb-14">
             <div>
-              <p className="velifa-eyebrow mb-2">Mon espace</p>
+              <p className="velifa-eyebrow mb-2">{t('eyebrow')}</p>
               <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="font-heading font-bold text-3xl sm:text-4xl text-text tracking-tight">
-                  {firstName ? `Bonjour, ${firstName}` : 'Bonjour'}
+                  {firstName ? `${t('hello')}, ${firstName}` : t('hello')}
                 </h1>
                 <PlanBadge plan={subPlan} />
               </div>
               <p className="text-text-muted mt-2 text-sm sm:text-base">
-                Vos audits de performance web en un coup d&apos;œil.
+                {t('subtitle')}
               </p>
             </div>
             <button
@@ -1209,17 +1212,17 @@ export default function DashboardPage() {
               className="velifa-btn flex items-center gap-2 self-start sm:self-auto"
             >
               <Plus className="w-4 h-4" />
-              Nouvel audit
+              {t('newAudit')}
             </button>
           </div>
 
           {/* Cartes de stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-8 sm:mb-10">
             {[
-              { icon: BarChart3, label: 'Audits', value: hasAudits ? stats.count : '—', sub: undefined, gold: false },
-              { icon: Gauge,    label: 'Score moyen', value: stats.avg != null ? stats.avg : '—', sub: stats.avg != null ? '/ 100' : undefined, gold: false },
-              { icon: Trophy,   label: 'Meilleur score', value: stats.max != null ? stats.max : '—', sub: stats.max != null ? '/ 100' : undefined, gold: false },
-              { icon: Award,    label: 'Top site', value: stats.best ? stripUrl(stats.best.url) : '—', sub: stats.best?.scorePerformance != null ? `${stats.best.scorePerformance} / 100` : undefined, gold: true },
+              { icon: BarChart3, label: t('statAudits'), value: hasAudits ? stats.count : '—', sub: undefined, gold: false },
+              { icon: Gauge,    label: t('statAvgScore'), value: stats.avg != null ? stats.avg : '—', sub: stats.avg != null ? '/ 100' : undefined, gold: false },
+              { icon: Trophy,   label: t('statBestScore'), value: stats.max != null ? stats.max : '—', sub: stats.max != null ? '/ 100' : undefined, gold: false },
+              { icon: Award,    label: t('statTopSite'), value: stats.best ? stripUrl(stats.best.url) : '—', sub: stats.best?.scorePerformance != null ? `${stats.best.scorePerformance} / 100` : undefined, gold: true },
             ].map(({ icon, label, value, sub, gold }, i) => (
               <div key={label} className="fade-up" style={{ animationDelay: `${50 + i * 50}ms` }}>
                 <StatCard icon={icon} label={label} value={value} sub={sub} isLoading={isLoading} gold={gold} />
@@ -1246,7 +1249,7 @@ export default function DashboardPage() {
               }}
             >
               <p style={{ color: 'var(--velifa-score-poor)' }} className="font-medium">
-                Impossible de charger vos audits
+                {t('loadError')}
               </p>
               <p className="text-text-muted text-sm mt-1">{error}</p>
             </div>
@@ -1279,14 +1282,14 @@ export default function DashboardPage() {
                 <FileSearch className="w-6 h-6 text-text-subtle" strokeWidth={1.5} />
               </div>
               <h2 className="font-heading font-semibold text-text text-lg mb-2">
-                Aucun audit pour l&apos;instant
+                {t('noAudits')}
               </h2>
               <p className="text-text-muted text-sm mb-6 max-w-sm mx-auto">
-                Lancez votre premier audit pour suivre la performance de vos sites en 30 secondes.
+                {t('noAuditsDesc')}
               </p>
               <Link href="/" className="velifa-btn inline-flex items-center gap-2">
                 <Zap className="w-4 h-4" />
-                Lancer mon premier audit
+                {t('startFirstAction')}
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -1367,11 +1370,11 @@ export default function DashboardPage() {
             return (
               <>
                 <div className="flex items-baseline justify-between mb-5 px-1">
-                  <h2 className="font-heading font-semibold text-text text-lg">Vos audits</h2>
+                  <h2 className="font-heading font-semibold text-text text-lg">{t('yourAudits')}</h2>
                   <span className="text-xs text-text-muted">
                     {isPro
-                      ? `${audits!.length} au total`
-                      : `${Math.min(audits!.length, FREE_AUDIT_LIMIT)} affichés · ${audits!.length} au total`}
+                      ? `${audits!.length} ${t('total')}`
+                      : `${Math.min(audits!.length, FREE_AUDIT_LIMIT)} ${t('shown')} · ${audits!.length} ${t('total')}`}
                   </span>
                 </div>
 
@@ -1418,15 +1421,15 @@ export default function DashboardPage() {
                           </div>
                           <div>
                             <p className="font-heading font-semibold text-text text-sm">
-                              {lockedAudits.length} audit{lockedAudits.length > 1 ? 's' : ''} masqué{lockedAudits.length > 1 ? 's' : ''}
+                              {lockedAudits.length} {t('hiddenAudits')}
                             </p>
                             <p className="text-text-muted text-xs mt-1">
-                              Débloquez l&apos;historique complet avec Velifa Pro
+                              {t('unlockedHistory')}
                             </p>
                           </div>
                           <Link href="/tarifs" className="velifa-btn flex items-center gap-2 text-xs mt-1">
                             <Sparkles className="w-3.5 h-3.5" />
-                            Passer Pro
+                            {t('goPro')}
                           </Link>
                         </div>
                       </div>

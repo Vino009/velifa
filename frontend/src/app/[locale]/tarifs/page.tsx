@@ -4,72 +4,10 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth, useUser } from '@clerk/nextjs';
+import { useTranslations } from 'next-intl';
 import { Check, Zap, Loader2, CheckCircle2, Sparkles, Gem } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useSubscription } from '@/context/SubscriptionContext';
-
-// ── Plan definitions ──────────────────────────────────────────────────────
-const plans = [
-  {
-    key: null as null,
-    name: 'Gratuit',
-    price: '0',
-    period: '€/mois',
-    description: 'Pour découvrir Velifa et analyser votre premier site.',
-    cta: 'Lancer un audit',
-    ctaHref: '/' as const,
-    ctaVariant: 'ghost' as const,
-    badge: null,
-    featured: false,
-    features: [
-      "Audit ponctuel d'une URL",
-      '4 scores de performance + Core Web Vitals',
-      "Capture d'écran du site",
-      'Rapport envoyé par email',
-    ],
-  },
-  {
-    key: 'pro' as const,
-    name: 'Pro',
-    price: '9',
-    period: '€/mois',
-    description: 'Pour suivre et améliorer vos performances dans le temps.',
-    cta: 'Choisir Pro',
-    ctaHref: null,
-    ctaVariant: 'gold' as const,
-    badge: 'Populaire',
-    featured: true,
-    features: [
-      'Tout le plan Gratuit',
-      'Compte personnel + tableau de bord',
-      'Historique de tous vos audits',
-      "Suivi de l'évolution des scores",
-      'Audits illimités',
-      'Support prioritaire',
-    ],
-  },
-  {
-    key: 'business' as const,
-    name: 'Business',
-    price: '29',
-    period: '€/mois',
-    description: 'Pour les équipes et agences gérant plusieurs projets web.',
-    cta: 'Choisir Business',
-    ctaHref: null,
-    ctaVariant: 'ghost' as const,
-    badge: 'Enterprise',
-    featured: false,
-    features: [
-      'Tout le plan Pro',
-      'Jusqu\'à 10 sites suivis simultanément',
-      'Alertes performance par email',
-      'Audits programmés automatiques',
-      'Export des rapports en PDF',
-      'Accès API dédié (clé API)',
-      'Support prioritaire avancé',
-    ],
-  },
-] as const;
 
 // ── Checkout button ───────────────────────────────────────────────────────
 function CheckoutButton({
@@ -136,13 +74,14 @@ function CheckoutButton({
       }
     : {};
 
-  const loadingLabel = isUpgrade ? 'Mise à niveau…' : 'Redirection…';
+  const t = useTranslations('pricing');
+  const loadingLabel = isUpgrade ? t('upgrading') : t('redirecting');
 
   return (
     <div className="flex flex-col gap-2">
       {isUpgrade && !loading && (
         <p className="text-center text-[11px] text-text-muted mb-1">
-          Votre abonnement Pro sera mis à niveau immédiatement
+          {t('upgradeNote')}
         </p>
       )}
       <button
@@ -175,6 +114,49 @@ export default function TarifsPage() {
   const userEmail = user?.primaryEmailAddress?.emailAddress ?? null;
   const { plan: currentPlan, isActive, refresh: refreshPlan } = useSubscription();
   const { isSignedIn } = useAuth();
+  const t = useTranslations('pricing');
+
+  const plans = [
+    {
+      key: null as null,
+      name: t('free.name'),
+      price: '0',
+      period: `€${t('perMonth')}`,
+      description: t('free.desc'),
+      cta: t('ctaFree'),
+      ctaHref: '/' as const,
+      ctaVariant: 'ghost' as const,
+      badge: null,
+      featured: false,
+      features: (t.raw('free.features') as string[]),
+    },
+    {
+      key: 'pro' as const,
+      name: t('pro.name'),
+      price: '9',
+      period: `€${t('perMonth')}`,
+      description: t('pro.desc'),
+      cta: t('ctaPro'),
+      ctaHref: null,
+      ctaVariant: 'gold' as const,
+      badge: t('pro.badge'),
+      featured: true,
+      features: (t.raw('pro.features') as string[]),
+    },
+    {
+      key: 'business' as const,
+      name: t('business.name'),
+      price: '29',
+      period: `€${t('perMonth')}`,
+      description: t('business.desc'),
+      cta: t('ctaBusiness'),
+      ctaHref: null,
+      ctaVariant: 'ghost' as const,
+      badge: t('business.badge'),
+      featured: false,
+      features: (t.raw('business.features') as string[]),
+    },
+  ] as const;
 
   // Re-fetch le plan à chaque visite (évite le stale data)
   useEffect(() => {
@@ -187,13 +169,12 @@ export default function TarifsPage() {
 
       {/* ── Hero ──────────────────────────────────────────────────── */}
       <section className="max-w-5xl mx-auto px-6 pt-16 pb-12 text-center">
-        <p className="velifa-eyebrow mb-4">Tarifs</p>
+        <p className="velifa-eyebrow mb-4">{t('eyebrow')}</p>
         <h1 className="font-heading text-4xl md:text-5xl font-bold text-text mb-4">
-          Une solution pour chaque besoin
+          {t('heroTitle')}
         </h1>
         <p className="text-text-muted text-lg max-w-xl mx-auto">
-          Du premier audit gratuit à la gestion avancée de vos performances web.
-          Sans engagement.
+          {t('heroSubtitle')}
         </p>
       </section>
 
@@ -211,7 +192,7 @@ export default function TarifsPage() {
               }}
             >
               <Sparkles className="w-4 h-4" />
-              Vous êtes actuellement sur le plan&nbsp;<strong className="capitalize">{currentPlan}</strong>
+              {t('currentPlanBadge')}&nbsp;<strong className="capitalize">{currentPlan}</strong>
             </span>
           </div>
         )}
@@ -326,9 +307,9 @@ export default function TarifsPage() {
                     }
                   >
                     <CheckCircle2 className="w-4 h-4" />
-                    Plan actuel ✓
+                    {t('currentPlanLabel')}
                   </div>
-                  <p className="text-xs text-text-subtle">Votre abonnement actif</p>
+                  <p className="text-xs text-text-subtle">{t('activeSubscription')}</p>
                 </div>
               ) : (
                 (() => {
@@ -339,7 +320,7 @@ export default function TarifsPage() {
                     currentPlan === 'pro';
 
                   const ctaLabel = isUpgrade
-                    ? '⬆ Passer à Business'
+                    ? t('upgradeToBusiness')
                     : plan.cta;
 
                   return (
@@ -361,16 +342,13 @@ export default function TarifsPage() {
 
         {/* Note sécurité */}
         <p className="text-center text-text-subtle text-xs mt-10">
-          Paiement sécurisé via{' '}
-          <span className="velifa-gold-text font-semibold">Lemon Squeezy</span>.
-          Résiliable à tout moment. Sans engagement.
+          {t('securePayment')}
         </p>
       </section>
 
       <div className="max-w-5xl mx-auto px-6 pb-16 text-center">
         <p className="text-text-subtle text-sm">
-          Velifa effectue les audits de performance. Les scores sont calculés selon une
-          méthodologie reconnue.
+          {t('footerNote')}
         </p>
       </div>
     </main>

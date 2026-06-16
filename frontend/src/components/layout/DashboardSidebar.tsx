@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { LayoutDashboard, BarChart2, Globe, Plus, Settings, CreditCard, HelpCircle, LogOut, Menu, X, Sparkles, Gem } from 'lucide-react';
 import { useUser, useClerk } from '@clerk/nextjs';
@@ -31,19 +32,20 @@ function fullName(user: ReturnType<typeof useUser>['user']): string {
 
 // ── Plan badge (inline, compact) ─────────────────────────────────────────────
 function PlanChip({ plan }: { plan: 'pro' | 'business' | null }) {
+  const tCommon = useTranslations('common');
   if (plan === 'business') return (
     <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: '#C8C8C8', background: 'rgba(200,200,200,0.10)', border: '1px solid rgba(200,200,200,0.22)', borderRadius: 999, padding: '1px 7px', flexShrink: 0 }}>
-      💎 Business
+      💎 {tCommon('business')}
     </span>
   );
   if (plan === 'pro') return (
     <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: '#D4AF37', background: 'rgba(212,175,55,0.10)', border: '1px solid rgba(212,175,55,0.28)', borderRadius: 999, padding: '1px 7px', flexShrink: 0 }}>
-      ⚡ Pro
+      ⚡ {tCommon('pro')}
     </span>
   );
   return (
     <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', color: 'var(--text-subtle)', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 999, padding: '1px 7px', flexShrink: 0 }}>
-      Gratuit
+      {tCommon('free')}
     </span>
   );
 }
@@ -53,6 +55,7 @@ function UserPopup({ onClose }: { onClose: () => void }) {
   const { signOut } = useClerk();
   const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
+  const t = useTranslations('dashboard');
 
   // Close on outside click
   useEffect(() => {
@@ -64,9 +67,9 @@ function UserPopup({ onClose }: { onClose: () => void }) {
   }, [onClose]);
 
   const items = [
-    { icon: Settings,   label: 'Paramètres', href: '/settings' },
-    { icon: CreditCard, label: 'Abonnement',  href: '/billing'  },
-    { icon: HelpCircle, label: 'Support',     href: '/support'  },
+    { icon: Settings,   label: t('settings'), href: '/settings' },
+    { icon: CreditCard, label: t('billing'),   href: '/billing'  },
+    { icon: HelpCircle, label: t('support'),   href: '/support'  },
   ];
 
   function goto(href: string) {
@@ -115,7 +118,7 @@ function UserPopup({ onClose }: { onClose: () => void }) {
         }}
       >
         <LogOut className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} style={{ color: 'rgba(255,255,255,0.40)' }} />
-        Déconnexion
+        {t('logout')}
       </button>
     </div>
   );
@@ -159,6 +162,7 @@ function SidebarContent({ onClose, onNewAudit }: { onClose?: () => void; onNewAu
   const { user }  = useUser();
   const { plan }  = useSubscription();
   const [popupOpen, setPopupOpen] = useState(false);
+  const t = useTranslations('dashboard');
 
   const isBusiness = plan === 'business';
 
@@ -171,13 +175,13 @@ function SidebarContent({ onClose, onNewAudit }: { onClose?: () => void; onNewAu
     },
     {
       icon: BarChart2,
-      label: 'Mes audits',
+      label: t('myAudits'),
       href: '/audits',
       match: (p) => p === '/audits' || p.startsWith('/audits/'),
     },
     ...(isBusiness ? [{
       icon: Globe,
-      label: 'Multi-sites',
+      label: t('multiSite'),
       href: '/dashboard#multisites',
       match: () => false,
     }] : []),
@@ -231,7 +235,7 @@ function SidebarContent({ onClose, onNewAudit }: { onClose?: () => void; onNewAu
           }}
         >
           <Plus style={{ width: 15, height: 15, strokeWidth: 2.5 }} />
-          Nouvel audit
+          {t('newAudit')}
         </button>
       </div>
 
@@ -312,6 +316,7 @@ function SidebarContent({ onClose, onNewAudit }: { onClose?: () => void; onNewAu
 export default function DashboardSidebar() {
   const [mobileOpen,    setMobileOpen]    = useState(false);
   const [auditModalOpen, setAuditModalOpen] = useState(false);
+  const tDash = useTranslations('dashboard');
   const pathname = usePathname();
 
   // Ferme le drawer mobile à chaque changement de route
@@ -387,7 +392,7 @@ export default function DashboardSidebar() {
           }}
         >
           <Plus style={{ width: 13, height: 13, strokeWidth: 2.5 }} />
-          Auditer
+          {tDash('newAudit')}
         </button>
       </div>
     </>
