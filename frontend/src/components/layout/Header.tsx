@@ -3,17 +3,14 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Zap, Menu, X, Sparkles, Gem } from 'lucide-react';
 import { UserButton, useAuth } from '@clerk/nextjs';
+import { useTranslations } from 'next-intl';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useSubscription } from '@/context/SubscriptionContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 
-const navLinks: Array<{ label: string; href: '/' | '/fonctionnalites' | '/tarifs' | '/faq' | '/contact' }> = [
-  { label: 'Accueil',         href: '/' },
-  { label: 'Fonctionnalités', href: '/fonctionnalites' },
-  { label: 'Tarifs',          href: '/tarifs' },
-  { label: 'FAQ',             href: '/faq' },
-  { label: 'Contact',         href: '/contact' },
-];
+type NavHref = '/' | '/fonctionnalites' | '/tarifs' | '/faq' | '/contact';
+const NAV_HREFS: NavHref[] = ['/', '/fonctionnalites', '/tarifs', '/faq', '/contact'];
+const NAV_KEYS = ['home', 'features', 'pricing', 'faq', 'contact'] as const;
 
 /** Badge inline plan — argent/platine pour Business, doré pour Pro */
 function HeaderPlanBadge({ plan }: { plan: 'pro' | 'business' | null }) {
@@ -53,6 +50,9 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { userId } = useAuth();
   const { plan } = useSubscription();
+  const t = useTranslations('nav');
+
+  const navLinks = NAV_HREFS.map((href, i) => ({ label: t(NAV_KEYS[i]), href }));
 
   return (
     <header className="bg-surface border-b border-border sticky top-0 z-50">
@@ -86,14 +86,14 @@ export default function Header() {
                   href="/dashboard"
                   className="flex items-center gap-1.5 text-sm text-text-muted hover:text-accent transition-colors whitespace-nowrap"
                 >
-                  Mon espace
+                  {t('dashboard')}
                   <HeaderPlanBadge plan={plan} />
                 </Link>
                 <UserButton />
               </>
             ) : (
               <Link href="/sign-in" className="velifa-btn velifa-btn--ghost text-xs">
-                Connexion
+                {t('login')}
               </Link>
             )}
           </div>
@@ -140,7 +140,7 @@ export default function Header() {
                       className="flex items-center gap-2 py-3 px-2 text-sm text-text-muted hover:text-accent hover:bg-surface-raised rounded-velifa-md transition"
                       onClick={() => setMenuOpen(false)}
                     >
-                      Mon espace
+                      {t('dashboard')}
                       <HeaderPlanBadge plan={plan} />
                     </Link>
                     <span className="px-2 text-xs text-text-subtle">Mon compte</span>
@@ -153,7 +153,7 @@ export default function Header() {
                   className="block py-3 px-2 text-sm text-text-muted hover:text-accent hover:bg-surface-raised rounded-velifa-md transition"
                   onClick={() => setMenuOpen(false)}
                 >
-                  Connexion
+                  {t('login')}
                 </Link>
               )}
             </div>

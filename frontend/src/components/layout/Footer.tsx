@@ -1,32 +1,37 @@
+'use client';
+
 import Link from 'next/link';
 import { Zap } from 'lucide-react';
-
-const columns: Array<{ title: string; links: Array<{ label: string; href: '/fonctionnalites' | '/tarifs' | '/faq' | '/a-propos' | '/contact' | '/mentions-legales' | '/confidentialite' }> }> = [
-  {
-    title: 'Produit',
-    links: [
-      { label: 'Fonctionnalités', href: '/fonctionnalites' as const },
-      { label: 'Tarifs',          href: '/tarifs' as const },
-      { label: 'FAQ',            href: '/faq' as const },
-    ],
-  },
-  {
-    title: 'Entreprise',
-    links: [
-      { label: 'À propos',  href: '/a-propos' as const },
-      { label: 'Contact',   href: '/contact' as const },
-    ],
-  },
-  {
-    title: 'Légal',
-    links: [
-      { label: 'Mentions légales',  href: '/mentions-legales' as const },
-      { label: 'Confidentialité',   href: '/confidentialite' as const },
-    ],
-  },
-];
+import { useTranslations } from 'next-intl';
 
 export default function Footer() {
+  const t = useTranslations('footer');
+
+  const columns = [
+    {
+      title: t('product'),
+      links: [
+        { label: t('features'), href: '/fonctionnalites' as const },
+        { label: t('pricing'),  href: '/tarifs' as const },
+        { label: t('faq'),      href: '/faq' as const },
+      ],
+    },
+    {
+      title: t('company'),
+      links: [
+        { label: t('about'),   href: '/a-propos' as const },
+        { label: t('contact'), href: '/contact' as const },
+      ],
+    },
+    {
+      title: t('legal'),
+      links: [
+        { label: t('legalNotice'), href: '/mentions-legales' as const },
+        { label: t('privacy'),     href: '/confidentialite' as const },
+      ],
+    },
+  ];
+
   return (
     <footer className="bg-bg-subtle border-t border-border">
       <div className="max-w-7xl mx-auto px-6 pt-14 pb-8">
@@ -40,7 +45,7 @@ export default function Footer() {
               <span className="velifa-wordmark text-sm">VELIFA</span>
             </Link>
             <p className="text-text-subtle text-xs leading-relaxed">
-              Performance Beyond Limits
+              {t('tagline')}
             </p>
             {/* Social placeholders */}
             <div className="flex items-center gap-3 mt-5">
@@ -83,11 +88,10 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-text-subtle text-xs">
-            © {new Date().getFullYear()} Velifa · Performance Beyond Limits
+            {t('copyright')}
           </p>
           <p className="text-text-subtle text-xs">
-            Propulsé par{' '}
-            <span className="text-accent">Velifa</span>
+            {t('madeWith')}
           </p>
         </div>
       </div>

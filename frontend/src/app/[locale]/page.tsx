@@ -8,6 +8,7 @@ import {
   RefreshCw, Eye, X, Sparkles,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
 import { useAuth, useUser } from '@clerk/nextjs';
 
@@ -16,6 +17,7 @@ function AuditForm() {
   const router = useRouter();
   const { getToken, isSignedIn } = useAuth();
   const { user } = useUser();
+  const t = useTranslations('hero');
   const [url, setUrl]     = useState('');
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState('');
@@ -78,10 +80,10 @@ function AuditForm() {
               <Clock className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-text">
-                  Ce site a déjà été analysé récemment
+                  {t('cachedTitle')}
                 </p>
                 <p className="text-xs text-text-muted mt-0.5">
-                  Un rapport existe déjà (moins de 24h). Que souhaitez-vous faire ?
+                  {t('cachedDesc')}
                 </p>
               </div>
             </div>
@@ -100,7 +102,7 @@ function AuditForm() {
               className="velifa-btn flex-1 flex items-center justify-center gap-2"
             >
               <Eye className="w-4 h-4" />
-              Voir le rapport existant
+              {t('viewReport')}
             </button>
             <button
               type="button"
@@ -109,7 +111,7 @@ function AuditForm() {
               className="velifa-btn velifa-btn--ghost flex-1 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              Relancer une analyse
+              {t('relaunch')}
             </button>
           </div>
         </div>
@@ -117,13 +119,13 @@ function AuditForm() {
 
       <div>
         <label className="block text-sm font-medium text-text mb-1.5">
-          URL de votre site
+          {t('urlLabel')}
         </label>
         <input
           type="url"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://votre-site.com"
+          placeholder={t('inputPlaceholder')}
           required
           disabled={loading}
           className="w-full px-4 py-3 border border-border rounded-velifa-md text-text bg-surface placeholder:text-subtle focus:outline-none focus:ring-2 focus:ring-accent-ring focus:border-transparent transition disabled:opacity-50"
@@ -142,11 +144,10 @@ function AuditForm() {
             <Sparkles className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: 'var(--accent)' }} />
             <div>
               <p className="text-sm font-semibold" style={{ color: 'var(--accent)' }}>
-                Vous avez utilisé vos audits gratuits du jour
+                {t('rateLimitTitle')}
               </p>
               <p className="text-xs text-text-muted mt-1 leading-relaxed">
-                Le plan gratuit est limité à 3 audits par 24h. Passez Pro pour des
-                audits illimités, l&apos;historique complet et les rapports avancés.
+                {t('rateLimitDesc')}
               </p>
             </div>
           </div>
@@ -156,14 +157,14 @@ function AuditForm() {
               className="velifa-btn flex items-center gap-2 text-xs"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              Passer Pro — 9€/mois
+              {t('upgradePro')}
             </Link>
             <button
               type="button"
               onClick={() => setRateLimited(false)}
               className="text-xs text-text-muted hover:text-text transition"
             >
-              Réessayer demain
+              {t('retryTomorrow')}
             </button>
           </div>
         </div>
@@ -182,17 +183,17 @@ function AuditForm() {
         className="velifa-btn w-full flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {loading ? (
-          <><Loader2 className="w-4 h-4 animate-spin" /> Lancement de l&apos;analyse...</>
+          <><Loader2 className="w-4 h-4 animate-spin" /> {t('analyzing')}</>
         ) : (
-          <>Analyser maintenant <ArrowRight className="w-4 h-4" /></>
+          <>{t('analyzeNow')} <ArrowRight className="w-4 h-4" /></>
         )}
       </button>
 
       <p className="text-xs text-center text-text-subtle">
-        En soumettant, vous acceptez notre{' '}
+        {t('privacyNote')}{' '}
         <Link href="/confidentialite" className="text-accent hover:text-accent-hover underline">
-          politique de confidentialité
-        </Link>. Aucun spam.
+          {t('privacyLink')}
+        </Link>. {t('noSpam')}
       </p>
     </form>
   );
@@ -478,25 +479,12 @@ function FeatureCarousel() {
   );
 }
 
-// ── Data ─────────────────────────────────────────────────────────────────────
-const keyFeatures = [
-  { icon: BarChart2,    title: 'Score détaillé',     desc: 'Performance, SEO, Accessibilité, Best Practices et Core Web Vitals complets.' },
-  { icon: Mail,         title: 'Rapport par email',   desc: 'Rapport complet envoyé sur votre email avec un lien de résultats persistant.' },
-  { icon: MessageCircle,title: 'Accompagnement WhatsApp', desc: 'Un expert vous contacte via WhatsApp pour améliorer vos métriques rapidement.' },
-  { icon: Shield,       title: 'Données protégées',   desc: 'Aucune donnée revendue, usage limité à l\'audit.' },
-];
-
-const steps = [
-  { number: '01', title: 'Entrez l\'URL',        desc: 'Saisissez l\'adresse du site à analyser. Aucun compte requis.' },
-  { number: '02', title: 'Analyse Velifa',  desc: 'Velifa lance les tests mobile et desktop pour mesurer la performance de votre site.' },
-  { number: '03', title: 'Rapport par email',   desc: 'Recevez un rapport complet avec scores, Core Web Vitals et recommandations.' },
-];
-
-const plansPreview = [
-  { name: 'Gratuit',  price: '0',  features: ['Audit ponctuel', '4 scores de performance', 'Capture d\'écran', 'Rapport email'] },
-  { name: 'Pro',      price: '9',  features: ['Tout le Gratuit', 'Historique', 'Suivi des scores', 'Audits illimités'], badge: 'Populaire' },
-  { name: 'Business', price: '29', features: ['Tout le Pro', 'Multi-sites', 'Audits programmés', 'Export PDF + API'] },
-];
+// ── Data — built inside component with translations (see HomePage) ────────────
+const KEY_FEATURE_ICONS = [BarChart2, Mail, MessageCircle, Shield];
+const KEY_FEATURE_KEYS = ['detailedScore', 'emailReport', 'whatsapp', 'dataProtected'] as const;
+const STEP_KEYS = ['step1', 'step2', 'step3'] as const;
+const PLAN_KEYS = ['free', 'pro', 'business'] as const;
+const PLAN_PRICES = ['0', '9', '29'] as const;
 
 // ── Hero Background Carousel ─────────────────────────────────────────────────────
 const heroImages = [
@@ -566,6 +554,33 @@ function HeroBackground() {
 
 // ── Page ─────────────────────────────────────────────────────────────────────
 export default function HomePage() {
+  const tHero  = useTranslations('hero');
+  const tTrust = useTranslations('trust');
+  const tFeat  = useTranslations('features');
+  const tKF    = useTranslations('keyFeatures');
+  const tHiW   = useTranslations('howItWorks');
+  const tPP    = useTranslations('pricingPreview');
+  const tCta   = useTranslations('cta');
+
+  const keyFeatures = KEY_FEATURE_ICONS.map((icon, i) => ({
+    icon,
+    title: tKF(`${KEY_FEATURE_KEYS[i]}.title`),
+    desc:  tKF(`${KEY_FEATURE_KEYS[i]}.desc`),
+  }));
+
+  const steps = STEP_KEYS.map((key) => ({
+    number: tHiW(`${key}.num`),
+    title:  tHiW(`${key}.title`),
+    desc:   tHiW(`${key}.desc`),
+  }));
+
+  const plansPreview = PLAN_KEYS.map((key, i) => ({
+    name:    tPP(`${key}.name`),
+    price:   PLAN_PRICES[i],
+    badge:   key === 'pro' ? tPP(`${key}.badge`) : undefined,
+    features: [] as string[],
+  }));
+
   return (
     <main className="min-h-screen bg-bg">
 
@@ -585,17 +600,16 @@ export default function HomePage() {
               {/* Badge */}
               <div className="inline-flex items-center gap-2 text-sm text-accent bg-accent-soft border border-border rounded-full px-4 py-1.5 mb-8">
                 <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                Analyse en 30 secondes · Rapport complet · 100% gratuit
+                {tHero('badge')}
               </div>
 
               <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-text leading-tight mb-6 tracking-tight">
-                Auditez et optimisez la<br className="hidden md:block" />
-                <span className="velifa-gold-text">performance de votre site</span>
+                {tHero('title')}<br className="hidden md:block" />
+                <span className="velifa-gold-text">{tHero('titleHighlight')}</span>
               </h1>
 
               <p className="text-xl text-text-muted mb-12 leading-relaxed max-w-lg mx-auto lg:mx-0">
-                Identifiez les faiblesses de votre site en quelques secondes.
-                Des Core Web Vitals aux scores de performance — avec un plan d&apos;amélioration actionnable.
+                {tHero('subtitle')}
               </p>
 
               {/* Formulaire inchangé */}
@@ -617,10 +631,10 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-text-subtle">
             {[
-              { icon: Shield, text: 'Aucune donnée revendue' },
-              { icon: Clock,  text: 'Résultat en moins de 30s' },
-              { icon: Zap,    text: 'Propulsé par Velifa' },
-              { icon: Globe,  text: 'Compatible tout site public' },
+              { icon: Shield, text: tTrust('noData') },
+              { icon: Clock,  text: tTrust('fast') },
+              { icon: Zap,    text: tTrust('powered') },
+              { icon: Globe,  text: tTrust('compatible') },
             ].map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-2">
                 <Icon className="w-4 h-4 text-accent" />
@@ -637,9 +651,9 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-6 py-20">
         <RevealSection>
           <div className="text-center mb-12">
-            <p className="velifa-eyebrow mb-4">Fonctionnalités</p>
+            <p className="velifa-eyebrow mb-4">{tFeat('eyebrow')}</p>
             <h2 className="font-heading text-3xl md:text-4xl font-bold text-text">
-              Ce que Velifa mesure pour vous
+              {tFeat('sectionTitle')}
             </h2>
           </div>
         </RevealSection>
@@ -654,12 +668,12 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-6 py-20">
         <RevealSection>
           <div className="text-center mb-14">
-            <p className="velifa-eyebrow mb-4">Fonctionnalités</p>
+            <p className="velifa-eyebrow mb-4">{tFeat('eyebrow')}</p>
             <h2 className="font-heading text-3xl md:text-4xl font-bold text-text mb-4">
-              Un audit complet, pas à pas
+              {tKF('sectionTitle')}
             </h2>
             <p className="text-text-muted max-w-xl mx-auto text-base">
-              Velifa vous donne toutes les métriques nécessaires pour comprendre et améliorer la performance de votre site.
+              {tKF('sectionSubtitle')}
             </p>
           </div>
         </RevealSection>
@@ -682,7 +696,7 @@ export default function HomePage() {
         <RevealSection delay={200}>
           <div className="text-center mt-10">
             <Link href="/fonctionnalites" className="velifa-btn velifa-btn--ghost inline-flex items-center gap-2">
-              Voir toutes les fonctionnalités
+              {tKF('seeAll')}
               <ArrowUpRight className="w-4 h-4" />
             </Link>
           </div>
@@ -696,9 +710,9 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6 py-20">
           <RevealSection>
             <div className="text-center mb-14">
-              <p className="velifa-eyebrow mb-4">Comment ça marche</p>
+              <p className="velifa-eyebrow mb-4">{tHiW('eyebrow')}</p>
               <h2 className="font-heading text-3xl md:text-4xl font-bold text-text">
-                En 3 étapes, votre rapport
+                {tHiW('stepsTitle')}
               </h2>
             </div>
           </RevealSection>
@@ -726,7 +740,7 @@ export default function HomePage() {
           <RevealSection delay={200}>
             <div className="text-center">
               <a href="#" className="velifa-btn inline-flex items-center gap-2">
-                Lancer un audit gratuit <ArrowRight className="w-4 h-4" />
+                {tHiW('ctaButton')} <ArrowRight className="w-4 h-4" />
               </a>
             </div>
           </RevealSection>
@@ -739,12 +753,12 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-6 py-20">
         <RevealSection>
           <div className="text-center mb-14">
-            <p className="velifa-eyebrow mb-4">Tarifs</p>
+            <p className="velifa-eyebrow mb-4">{tPP('eyebrow')}</p>
             <h2 className="font-heading text-3xl md:text-4xl font-bold text-text mb-4">
-              Un plan pour chaque besoin
+              {tPP('previewTitle')}
             </h2>
             <p className="text-text-muted max-w-xl mx-auto text-base">
-              Du premier audit gratuit au suivi avancé de vos performances.
+              {tPP('previewSubtitle')}
             </p>
           </div>
         </RevealSection>
@@ -770,7 +784,7 @@ export default function HomePage() {
                   </h3>
                   <div className="flex items-baseline justify-center gap-1">
                     <span className="font-heading text-4xl font-bold text-text">{plan.price}</span>
-                    <span className="text-text-muted text-sm">€/mois</span>
+                    <span className="text-text-muted text-sm">€{tPP('perMonth')}</span>
                   </div>
                 </div>
                 <ul className="space-y-2 flex-1 mb-6">
@@ -789,7 +803,7 @@ export default function HomePage() {
         <RevealSection delay={200}>
           <div className="text-center">
             <Link href="/tarifs" className="velifa-btn velifa-btn--ghost inline-flex items-center gap-2">
-              Voir les tarifs détaillés
+              {tPP('seeAllPlans')}
               <ArrowUpRight className="w-4 h-4" />
             </Link>
           </div>
@@ -803,13 +817,13 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6 py-20 text-center">
           <RevealSection>
             <h2 className="font-heading text-3xl md:text-4xl font-bold text-text mb-5">
-              Prêt à booster votre site ?
+              {tCta('title')}
             </h2>
             <p className="text-text-muted mb-10 text-base">
-              Lancez votre premier audit gratuit — moins de 30 secondes pour connaître vos scores.
+              {tCta('subtitle')}
             </p>
             <a href="#" className="velifa-btn inline-flex items-center gap-2">
-              Analyser mon site maintenant
+              {tCta('button')}
               <ArrowRight className="w-4 h-4" />
             </a>
           </RevealSection>

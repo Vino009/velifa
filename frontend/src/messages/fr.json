@@ -20,7 +20,20 @@
     "inputPlaceholder": "https://votresite.com",
     "analyzeButton": "Analyser mon site",
     "analyzing": "Analyse en cours...",
-    "freeNote": "Analyse gratuite · Aucune inscription requise"
+    "freeNote": "Analyse gratuite · Aucune inscription requise",
+    "urlLabel": "URL de votre site",
+    "cachedTitle": "Ce site a déjà été analysé récemment",
+    "cachedDesc": "Un rapport existe déjà (moins de 24h). Que souhaitez-vous faire ?",
+    "viewReport": "Voir le rapport existant",
+    "relaunch": "Relancer une analyse",
+    "rateLimitTitle": "Vous avez utilisé vos audits gratuits du jour",
+    "rateLimitDesc": "Le plan gratuit est limité à 3 audits par 24h. Passez Pro pour des audits illimités, l'historique complet et les rapports avancés.",
+    "upgradePro": "Passer Pro — 9€/mois",
+    "retryTomorrow": "Réessayer demain",
+    "analyzeNow": "Analyser maintenant",
+    "privacyNote": "En soumettant, vous acceptez notre",
+    "privacyLink": "politique de confidentialité",
+    "noSpam": "Aucun spam."
   },
   "trust": {
     "noData": "Aucune donnée revendue",
@@ -29,6 +42,7 @@
     "compatible": "Compatible tout site public"
   },
   "features": {
+    "eyebrow": "Fonctionnalités",
     "sectionTitle": "Ce que Velifa mesure pour vous",
     "performanceScore": {
       "title": "Score de performance complet",
@@ -52,6 +66,9 @@
     }
   },
   "keyFeatures": {
+    "sectionTitle": "Un audit complet, pas à pas",
+    "sectionSubtitle": "Velifa vous donne toutes les métriques nécessaires pour comprendre et améliorer la performance de votre site.",
+    "seeAll": "Voir toutes les fonctionnalités",
     "detailedScore": {
       "title": "Score détaillé",
       "desc": "Performance, SEO, accessibilité et bonnes pratiques"
@@ -70,6 +87,9 @@
     }
   },
   "howItWorks": {
+    "eyebrow": "Comment ça marche",
+    "stepsTitle": "En 3 étapes, votre rapport",
+    "ctaButton": "Lancer un audit gratuit",
     "title": "Comment ça marche ?",
     "step1": {
       "num": "01",
@@ -88,6 +108,9 @@
     }
   },
   "pricingPreview": {
+    "eyebrow": "Tarifs",
+    "previewTitle": "Un plan pour chaque besoin",
+    "previewSubtitle": "Du premier audit gratuit au suivi avancé de vos performances.",
     "title": "Tarifs simples et transparents",
     "free": {
       "name": "Gratuit",

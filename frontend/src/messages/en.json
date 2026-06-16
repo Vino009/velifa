@@ -20,7 +20,20 @@
     "inputPlaceholder": "https://yoursite.com",
     "analyzeButton": "Analyze my site",
     "analyzing": "Analyzing...",
-    "freeNote": "Free analysis · No registration required"
+    "freeNote": "Free analysis · No registration required",
+    "urlLabel": "URL of your site",
+    "cachedTitle": "This site was recently analyzed",
+    "cachedDesc": "A report already exists (less than 24h). What would you like to do?",
+    "viewReport": "View existing report",
+    "relaunch": "Relaunch analysis",
+    "rateLimitTitle": "You have used your free audits for today",
+    "rateLimitDesc": "The free plan is limited to 3 audits per 24h. Go Pro for unlimited audits, full history and advanced reports.",
+    "upgradePro": "Go Pro — €9/month",
+    "retryTomorrow": "Try again tomorrow",
+    "analyzeNow": "Analyze now",
+    "privacyNote": "By submitting, you accept our",
+    "privacyLink": "privacy policy",
+    "noSpam": "No spam."
   },
   "trust": {
     "noData": "No data resold",
@@ -29,6 +42,7 @@
     "compatible": "Compatible with all public sites"
   },
   "features": {
+    "eyebrow": "Features",
     "sectionTitle": "What Velifa measures for you",
     "performanceScore": {
       "title": "Complete Performance Score",
@@ -52,6 +66,9 @@
     }
   },
   "keyFeatures": {
+    "sectionTitle": "A complete audit, step by step",
+    "sectionSubtitle": "Velifa gives you all the metrics you need to understand and improve your website performance.",
+    "seeAll": "See all features",
     "detailedScore": {
       "title": "Detailed Score",
       "desc": "Performance, SEO, accessibility and best practices"
@@ -70,6 +87,9 @@
     }
   },
   "howItWorks": {
+    "eyebrow": "How it works",
+    "stepsTitle": "In 3 steps, your report",
+    "ctaButton": "Launch a free audit",
     "title": "How does it work?",
     "step1": {
       "num": "01",
@@ -88,6 +108,9 @@
     }
   },
   "pricingPreview": {
+    "eyebrow": "Pricing",
+    "previewTitle": "A plan for every need",
+    "previewSubtitle": "From your first free audit to advanced performance tracking.",
     "title": "Simple, transparent pricing",
     "free": {
       "name": "Free",
