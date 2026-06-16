@@ -322,7 +322,7 @@ export default function AuditsPage() {
                         {['URL', 'Perf.', 'SEO', 'Date', 'Statut', 'Actions'].map((h) => (
                           <th
                             key={h}
-                            className="px-4 py-3 text-left text-[10px] font-semibold tracking-widest uppercase text-text-subtle"
+                            className="px-4 py-3 text-start text-[10px] font-semibold tracking-widest uppercase text-text-subtle"
                           >
                             {h}
                           </th>

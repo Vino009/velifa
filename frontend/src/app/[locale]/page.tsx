@@ -67,7 +67,7 @@ function AuditForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="velifa-card text-left space-y-4"
+      className="velifa-card text-start space-y-4"
       style={{ background: 'var(--surface)', maxWidth: '600px', margin: '0 auto' }}
     >
       {cachedInfo && (
@@ -596,7 +596,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
             {/* Left: text + form */}
-            <div className="text-center lg:text-left">
+            <div className="text-center lg:text-start">
               {/* Badge */}
               <div className="inline-flex items-center gap-2 text-sm text-accent bg-accent-soft border border-border rounded-full px-4 py-1.5 mb-8">
                 <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />

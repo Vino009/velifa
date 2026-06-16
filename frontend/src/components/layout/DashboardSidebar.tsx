@@ -92,7 +92,7 @@ function UserPopup({ onClose }: { onClose: () => void }) {
         <button
           key={href}
           onClick={() => goto(href)}
-          className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors duration-100"
+          className="w-full flex items-center gap-3 px-4 py-2.5 text-start text-sm transition-colors duration-100"
           style={{ color: 'rgba(255,255,255,0.75)' }}
           onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
           onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
@@ -104,7 +104,7 @@ function UserPopup({ onClose }: { onClose: () => void }) {
       <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '2px 0' }} />
       <button
         onClick={() => { onClose(); signOut({ redirectUrl: '/' }); }}
-        className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors duration-100"
+        className="w-full flex items-center gap-3 px-4 py-2.5 text-start text-sm transition-colors duration-100"
         style={{ color: 'rgba(255,255,255,0.75)' }}
         onMouseEnter={(e) => {
           e.currentTarget.style.background = 'rgba(239,68,68,0.10)';
@@ -142,7 +142,7 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
       {/* Barre gauche active */}
       {active && (
         <span
-          className="absolute left-0 top-1/2 -translate-y-1/2 rounded-r-full"
+          className="absolute start-0 top-1/2 -translate-y-1/2 rounded-e-full"
           style={{ width: 2, height: 18, background: '#D4AF37' }}
         />
       )}
@@ -269,7 +269,7 @@ function SidebarContent({ onClose, onNewAudit }: { onClose?: () => void; onNewAu
 
         <button
           onClick={() => setPopupOpen((o) => !o)}
-          className="w-full flex items-center gap-3 min-w-0 rounded-[8px] text-left transition-colors duration-150 group"
+          className="w-full flex items-center gap-3 min-w-0 rounded-[8px] text-start transition-colors duration-150 group"
           style={{ padding: '6px 8px' }}
           onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
@@ -384,7 +384,7 @@ export default function DashboardSidebar() {
         {/* Bouton Nouvel audit rapide sur mobile */}
         <button
           onClick={openAudit}
-          className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-xs font-semibold transition-all"
+          className="ms-auto flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-xs font-semibold transition-all"
           style={{
             background: 'rgba(212,175,55,0.12)',
             border:     '1px solid rgba(212,175,55,0.28)',

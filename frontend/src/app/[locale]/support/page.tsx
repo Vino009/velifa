@@ -42,7 +42,7 @@ function Accordion({ q, a }: { q: string; a: string }) {
     >
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between gap-4 py-4 text-left"
+        className="w-full flex items-center justify-between gap-4 py-4 text-start"
       >
         <span className="text-sm font-medium text-text">{q}</span>
         {open

@@ -472,7 +472,7 @@ function BusinessUpgradeTeaser({ feature }: { feature: string }) {
       >
         <Gem className="w-5 h-5" style={{ color: BUSINESS_SILVER }} />
       </div>
-      <div className="flex-1 text-center sm:text-left">
+      <div className="flex-1 text-center sm:text-start">
         <p className="font-heading font-semibold text-sm" style={{ color: BUSINESS_SILVER }}>
           Fonctionnalité Business
         </p>

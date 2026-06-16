@@ -103,7 +103,7 @@ function LoadingContent() {
           </div>
 
           {/* ── Étapes ───────────────────────────────────────────── */}
-          <div className="space-y-3 w-full max-w-sm text-left">
+          <div className="space-y-3 w-full max-w-sm text-start">
             {STEPS.map((step, i) => {
               const Icon    = step.icon;
               const done    = i < stepIndex;
