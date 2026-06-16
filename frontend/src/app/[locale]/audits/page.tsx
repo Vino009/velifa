@@ -9,14 +9,17 @@ import {
   Loader2, Zap, ChevronLeft, ChevronRight, Filter, Calendar,
   Gauge, Search,
 } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 import { api } from '@/lib/api';
 import type { MyAudit } from '@/types/analysis';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('fr-FR', {
-    day: 'numeric', month: 'short', year: 'numeric',
-  });
+function useFormatDate() {
+  const locale = useLocale();
+  return (iso: string): string =>
+    new Date(iso).toLocaleDateString(locale, {
+      day: 'numeric', month: 'short', year: 'numeric',
+    });
 }
 
 function stripUrl(url: string): string {
@@ -36,9 +39,6 @@ function bucket(score: number | null): ScoreBucket {
 
 const SCORE_COLOR: Record<ScoreBucket, string> = {
   good: '#0CCE6B', average: '#FFA400', poor: '#FF4E42', unknown: 'var(--text-subtle)',
-};
-const SCORE_LABEL: Record<ScoreBucket, string> = {
-  good: 'Excellent', average: 'À améliorer', poor: 'Critique', unknown: '—',
 };
 
 type DateFilter  = '7d' | '30d' | 'all';
@@ -105,7 +105,14 @@ function RowSkeleton() {
 }
 
 // ── Empty state ──────────────────────────────────────────────────────────────
-function EmptyState({ filtered }: { filtered: boolean }) {
+function EmptyState({ filtered, noResultsTitle, noResultsDesc, noAuditsTitle, noAuditsDesc, launchLabel }: {
+  filtered: boolean;
+  noResultsTitle: string;
+  noResultsDesc: string;
+  noAuditsTitle: string;
+  noAuditsDesc: string;
+  launchLabel: string;
+}) {
   return (
     <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
       <div
@@ -116,18 +123,16 @@ function EmptyState({ filtered }: { filtered: boolean }) {
       </div>
       <div>
         <h3 className="font-heading font-semibold text-text text-lg mb-1">
-          {filtered ? 'Aucun résultat' : 'Aucun audit pour l\'instant'}
+          {filtered ? noResultsTitle : noAuditsTitle}
         </h3>
         <p className="text-text-muted text-sm max-w-xs">
-          {filtered
-            ? 'Essayez de modifier vos filtres pour voir plus de résultats.'
-            : 'Lancez votre premier audit pour commencer à suivre vos performances.'}
+          {filtered ? noResultsDesc : noAuditsDesc}
         </p>
       </div>
       {!filtered && (
         <Link href="/" className="velifa-btn inline-flex items-center gap-2 mt-2">
           <Zap className="w-4 h-4" />
-          Lancer un audit
+          {launchLabel}
         </Link>
       )}
     </div>
@@ -138,6 +143,15 @@ function EmptyState({ filtered }: { filtered: boolean }) {
 export default function AuditsPage() {
   const router = useRouter();
   const { isLoaded, isSignedIn, getToken } = useAuth();
+  const t = useTranslations('audits');
+  const formatDate = useFormatDate();
+
+  const SCORE_LABEL: Record<ScoreBucket, string> = {
+    good: t('scoreGood'),
+    average: t('scoreAverage'),
+    poor: t('scorePoor'),
+    unknown: '—',
+  };
 
   const [audits, setAudits]       = useState<MyAudit[] | null>(null);
   const [error, setError]         = useState<string | null>(null);
@@ -236,20 +250,19 @@ export default function AuditsPage() {
 
           {/* Header */}
           <div className="fade-up mb-10">
-            
             <h1 className="font-heading font-bold text-3xl sm:text-4xl text-text tracking-tight">
-              Mes Audits
+              {t('title')}
             </h1>
             <p className="text-text-muted mt-2 text-sm">
-              Consultez et gérez tous vos audits de performance.
+              {t('subtitle')}
             </p>
           </div>
 
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 fade-up" style={{ animationDelay: '60ms' }}>
-            <StatCard label="Total audits"   value={stats.total}        icon={BarChart3} />
-            <StatCard label="Score moyen"    value={stats.avg ?? '—'}   icon={Gauge} />
-            <StatCard label="Meilleur score" value={stats.best ?? '—'}  icon={Search} gold />
+            <StatCard label={t('statTotal')}  value={stats.total}        icon={BarChart3} />
+            <StatCard label={t('statAvg')}    value={stats.avg ?? '—'}   icon={Gauge} />
+            <StatCard label={t('statBest')}   value={stats.best ?? '—'}  icon={Search} gold />
           </div>
 
           {/* Filters */}
@@ -263,7 +276,7 @@ export default function AuditsPage() {
           >
             <div className="flex items-center gap-2 text-text-subtle">
               <Calendar className="w-4 h-4" />
-              <span className="text-xs font-semibold tracking-widest uppercase">Période</span>
+              <span className="text-xs font-semibold tracking-widest uppercase">{t('period')}</span>
             </div>
             {(['all', '7d', '30d'] as DateFilter[]).map((f) => (
               <button
@@ -274,7 +287,7 @@ export default function AuditsPage() {
                   ? { background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.35)', color: 'var(--accent)' }
                   : { background: 'var(--surface-raised)', border: '1px solid var(--border)', color: 'var(--text-muted)' }}
               >
-                {f === 'all' ? 'Tout' : f === '7d' ? '7 jours' : '30 jours'}
+                {f === 'all' ? t('filterAll') : f === '7d' ? t('filter7d') : t('filter30d')}
               </button>
             ))}
 
@@ -282,7 +295,7 @@ export default function AuditsPage() {
 
             <div className="flex items-center gap-2 text-text-subtle">
               <Filter className="w-4 h-4" />
-              <span className="text-xs font-semibold tracking-widest uppercase">Score</span>
+              <span className="text-xs font-semibold tracking-widest uppercase">{t('score')}</span>
             </div>
             {(['all', 'good', 'average', 'poor'] as ScoreFilter[]).map((f) => (
               <button
@@ -293,7 +306,7 @@ export default function AuditsPage() {
                   ? { background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.35)', color: 'var(--accent)' }
                   : { background: 'var(--surface-raised)', border: '1px solid var(--border)', color: 'var(--text-muted)' }}
               >
-                {f === 'all' ? 'Tous' : f === 'good' ? 'Bon' : f === 'average' ? 'Moyen' : 'Critique'}
+                {f === 'all' ? t('scoreAll') : f === 'good' ? t('scoreGood') : f === 'average' ? t('scoreAverage') : t('scorePoor')}
               </button>
             ))}
           </div>
@@ -310,7 +323,7 @@ export default function AuditsPage() {
           >
             {error ? (
               <div className="py-16 text-center">
-                <p className="text-sm font-medium" style={{ color: '#FF4E42' }}>Impossible de charger vos audits</p>
+                <p className="text-sm font-medium" style={{ color: '#FF4E42' }}>{t('loadError')}</p>
                 <p className="text-text-muted text-xs mt-1">{error}</p>
               </div>
             ) : (
@@ -319,7 +332,7 @@ export default function AuditsPage() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                        {['URL', 'Perf.', 'SEO', 'Date', 'Statut', 'Actions'].map((h) => (
+                        {[t('colUrl'), t('colPerf'), t('colSeo'), t('colDate'), t('colStatus'), t('colActions')].map((h) => (
                           <th
                             key={h}
                             className="px-4 py-3 text-start text-[10px] font-semibold tracking-widest uppercase text-text-subtle"
@@ -336,7 +349,14 @@ export default function AuditsPage() {
                           ? (
                             <tr>
                               <td colSpan={6}>
-                                <EmptyState filtered={dateFilter !== 'all' || scoreFilter !== 'all'} />
+                                <EmptyState
+                                  filtered={dateFilter !== 'all' || scoreFilter !== 'all'}
+                                  noResultsTitle={t('noResults')}
+                                  noResultsDesc={t('noResultsDesc')}
+                                  noAuditsTitle={t('noAudits')}
+                                  noAuditsDesc={t('noAuditsDesc')}
+                                  launchLabel={t('launchAudit')}
+                                />
                               </td>
                             </tr>
                           )
@@ -384,7 +404,7 @@ export default function AuditsPage() {
                                     border: '1px solid rgba(12,206,107,0.30)',
                                   }}
                                 >
-                                  Terminé
+                                  {t('completed')}
                                 </span>
                               </td>
                               {/* Actions */}
@@ -400,7 +420,7 @@ export default function AuditsPage() {
                                     }}
                                   >
                                     <FileSearch className="w-3 h-3" />
-                                    Rapport
+                                    {t('report')}
                                     <ArrowRight className="w-3 h-3" />
                                   </Link>
                                   <button
@@ -417,7 +437,7 @@ export default function AuditsPage() {
                                       ? <Loader2 className="w-3 h-3 animate-spin" />
                                       : <RefreshCw className="w-3 h-3" />
                                     }
-                                    Relancer
+                                    {t('relaunch')}
                                   </button>
                                 </div>
                               </td>
@@ -435,7 +455,7 @@ export default function AuditsPage() {
                     style={{ borderTop: '1px solid var(--border)' }}
                   >
                     <p className="text-xs text-text-muted">
-                      {filtered.length} résultat{filtered.length > 1 ? 's' : ''} · page {page}/{totalPages}
+                      {filtered.length} {t('results')} · {t('page')} {page}/{totalPages}
                     </p>
                     <div className="flex items-center gap-2">
                       <button
@@ -445,7 +465,7 @@ export default function AuditsPage() {
                         style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)', color: 'var(--text-muted)' }}
                       >
                         <ChevronLeft className="w-3.5 h-3.5" />
-                        Préc.
+                        {t('prev')}
                       </button>
                       <button
                         onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
@@ -453,7 +473,7 @@ export default function AuditsPage() {
                         className="flex items-center gap-1 px-3 py-1.5 rounded-[8px] text-xs font-medium transition-all disabled:opacity-40"
                         style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)', color: 'var(--text-muted)' }}
                       >
-                        Suiv.
+                        {t('next')}
                         <ChevronRight className="w-3.5 h-3.5" />
                       </button>
                     </div>

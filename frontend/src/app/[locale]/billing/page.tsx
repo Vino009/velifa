@@ -9,9 +9,10 @@ import {
   Calendar, History, ExternalLink,
 } from 'lucide-react';
 import { useSubscription } from '@/context/SubscriptionContext';
+import { useTranslations } from 'next-intl';
 
 // ── Plan badge ────────────────────────────────────────────────────────────────
-function PlanBadge({ plan }: { plan: 'pro' | 'business' | null }) {
+function PlanBadge({ plan, freeLabel }: { plan: 'pro' | 'business' | null; freeLabel: string }) {
   if (plan === 'pro') return (
     <span
       className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase"
@@ -43,7 +44,7 @@ function PlanBadge({ plan }: { plan: 'pro' | 'business' | null }) {
       className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase"
       style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)', color: 'var(--text-subtle)' }}
     >
-      Gratuit
+      {freeLabel}
     </span>
   );
 }
@@ -54,6 +55,7 @@ export default function BillingPage() {
   const { isLoaded, isSignedIn } = useAuth();
   const { user } = useUser();
   const { plan, isActive } = useSubscription();
+  const t = useTranslations('billing');
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) router.push('/sign-in');
@@ -69,7 +71,7 @@ export default function BillingPage() {
 
   const email = user?.primaryEmailAddress?.emailAddress ?? '';
   const isPaid = plan === 'pro' || plan === 'business';
-  const planLabel = plan === 'pro' ? 'Pro' : plan === 'business' ? 'Business' : 'Gratuit';
+  const planLabel = plan === 'pro' ? 'Pro' : plan === 'business' ? 'Business' : t('freePlan');
 
   return (
     <>
@@ -86,11 +88,10 @@ export default function BillingPage() {
 
           {/* Header */}
           <div className="fade-up">
-            
             <h1 className="font-heading font-bold text-3xl sm:text-4xl text-text tracking-tight">
-              Abonnement
+              {t('title')}
             </h1>
-            <p className="text-text-muted mt-2 text-sm">Gérez votre plan et votre facturation.</p>
+            <p className="text-text-muted mt-2 text-sm">{t('subtitle')}</p>
           </div>
 
           {/* Plan actuel */}
@@ -127,11 +128,11 @@ export default function BillingPage() {
                 </div>
                 <div>
                   <p className="text-[10px] font-semibold tracking-widest uppercase text-text-subtle mb-1">
-                    Plan actuel
+                    {t('currentPlan')}
                   </p>
                   <div className="flex items-center gap-2">
                     <span className="font-heading font-bold text-xl text-text">{planLabel}</span>
-                    <PlanBadge plan={plan} />
+                    <PlanBadge plan={plan} freeLabel={t('freePlan')} />
                   </div>
                 </div>
               </div>
@@ -142,7 +143,7 @@ export default function BillingPage() {
                   className="velifa-btn inline-flex items-center gap-2 self-start sm:self-auto"
                 >
                   <Sparkles className="w-4 h-4" />
-                  Changer de plan
+                  {t('changePlan')}
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               )}
@@ -156,7 +157,7 @@ export default function BillingPage() {
                     color: 'var(--text-muted)',
                   }}
                 >
-                  Gérer le plan
+                  {t('managePlan')}
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               )}
@@ -170,7 +171,7 @@ export default function BillingPage() {
               >
                 <Calendar className="w-4 h-4 flex-shrink-0" />
                 <span>
-                  Renouvellement géré par Lemon Squeezy — consultez vos emails pour la date exacte.
+                  {t('renewalNote')}
                 </span>
               </div>
             )}
@@ -191,15 +192,15 @@ export default function BillingPage() {
               style={{ borderBottom: '1px solid var(--border)' }}
             >
               <History className="w-4 h-4 text-accent" strokeWidth={1.75} />
-              <h2 className="font-heading font-semibold text-sm text-text">Historique de facturation</h2>
+              <h2 className="font-heading font-semibold text-sm text-text">{t('historyTitle')}</h2>
             </div>
             <div className="px-6 py-10 flex flex-col items-center gap-3 text-center">
               <History className="w-8 h-8 text-text-subtle" strokeWidth={1.25} />
               <p className="text-sm font-medium text-text-muted">
-                Historique disponible après déploiement
+                {t('historyEmpty')}
               </p>
               <p className="text-xs text-text-subtle max-w-xs">
-                Vos factures et reçus apparaîtront ici une fois la plateforme en production.
+                {t('historyEmptyDesc')}
               </p>
             </div>
           </div>
@@ -217,9 +218,9 @@ export default function BillingPage() {
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm font-medium text-text mb-0.5">Annuler l&apos;abonnement</p>
+                  <p className="text-sm font-medium text-text mb-0.5">{t('cancelTitle')}</p>
                   <p className="text-xs text-text-muted">
-                    Vous garderez l&apos;accès jusqu&apos;à la fin de la période en cours.
+                    {t('cancelDesc')}
                   </p>
                 </div>
                 <a
@@ -232,7 +233,7 @@ export default function BillingPage() {
                   }}
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
-                  Contacter le support
+                  {t('contactSupport')}
                 </a>
               </div>
             </div>

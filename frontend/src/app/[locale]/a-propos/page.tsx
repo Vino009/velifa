@@ -1,80 +1,53 @@
 import Link from 'next/link';
-import { Zap, Globe, Search, Gauge, ArrowRight, Sparkles, Eye, Target } from 'lucide-react';
+import { Globe, Search, Gauge, ArrowRight, Sparkles, Eye, Target } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 
-const whyPoints = [
-  {
-    icon: Globe,
-    title: 'Un site lent fait fuir les visiteurs',
-    description: 'Quelques secondes de chargement en plus suffisent à perdre une part importante de vos visiteurs. La performance est un facteur clé de la rétention.',
-  },
-  {
-    icon: Search,
-    title: 'La vitesse influence le référencement',
-    description: 'Google intègre la performance des pages dans ses critères de classement. Un site rapide a un avantage significatif en termes de visibilité.',
-  },
-  {
-    icon: Gauge,
-    title: 'Les Core Web Vitals sont des critères officiels',
-    description: 'Google utilise LCP, CLS et TBT pour évaluer l\'expérience utilisateur. Ces métriques jouent un rôle direct dans le classement de vos pages.',
-  },
-];
+export default async function AProposPage() {
+  const t = await getTranslations('about');
 
-const values = [
-  {
-    icon: Sparkles,
-    title: 'Simplicité',
-    description: 'Pas besoin d\'être expert pour comprendre ses scores. Velifa traduit les données techniques en informations claires et actionnables.',
-  },
-  {
-    icon: Eye,
-    title: 'Transparence',
-    description: 'Les audits sont réalisés via une technologie reconnue. Les résultats sont reproductibles et vérifiables.',
-  },
-  {
-    icon: Target,
-    title: 'Résultats concrets',
-    description: 'Chaque recommandation est actionable. Velifa vous aide à passer de l\'analyse à l\'amélioration réelle de vos performances.',
-  },
-];
+  const whyPoints = [
+    { icon: Globe,  title: t('why1Title'), description: t('why1Desc') },
+    { icon: Search, title: t('why2Title'), description: t('why2Desc') },
+    { icon: Gauge,  title: t('why3Title'), description: t('why3Desc') },
+  ];
 
-export default function AProposPage() {
+  const values = [
+    { icon: Sparkles, title: t('val1Title'), description: t('val1Desc') },
+    { icon: Eye,      title: t('val2Title'), description: t('val2Desc') },
+    { icon: Target,   title: t('val3Title'), description: t('val3Desc') },
+  ];
+
   return (
     <main className="min-h-screen bg-bg">
-     
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="max-w-5xl mx-auto px-6 pt-16 pb-20 text-center">
-        <p className="velifa-eyebrow mb-5">À propos</p>
+        <p className="velifa-eyebrow mb-5">{t('eyebrow')}</p>
         <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-text mb-6 leading-tight">
-          La performance web<br className="hidden md:block" />
-          à la portée de tous
+          {t('title')}
         </h1>
         <p className="text-text-muted text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-          Velifa rend l&apos;audit de performance accessible, clair et actionnable. Nous croyons que chaque site mérite d&apos;être rapide.
+          {t('subtitle')}
         </p>
       </section>
 
-      {/* ── Notre mission ─────────────────────────────────────────────────── */}
       <section className="max-w-5xl mx-auto px-6 pb-20">
         <div className="velifa-card py-10 px-8 md:py-14 md:px-16 text-center">
-          <p className="velifa-eyebrow mb-6">Notre mission</p>
+          <p className="velifa-eyebrow mb-6">{t('missionEyebrow')}</p>
           <h2 className="font-heading text-2xl md:text-3xl font-bold text-text mb-6">
-            Rendre le web plus rapide, ensemble
+            {t('missionTitle')}
           </h2>
           <p className="text-text-muted leading-relaxed text-base md:text-lg max-w-2xl mx-auto">
-            La performance d&apos;un site web ne devrait pas être un domaine réservé aux experts techniques. Pourtant, elle conditionne l&apos;expérience de chaque visiteur et le succès de chaque projet en ligne. Velifa existe pour changer cela — en offrant un outil d&apos;audit simple, transparent et vraiment utile, accessible à tous ceux qui veulent créer des sites plus rapides.
+            {t('missionDesc')}
           </p>
         </div>
       </section>
 
-      {/* ── Pourquoi la performance compte ────────────────────────────────── */}
       <section className="max-w-5xl mx-auto px-6 pb-20">
         <div className="text-center mb-12">
-          <p className="velifa-eyebrow mb-4">Pourquoi la performance compte</p>
+          <p className="velifa-eyebrow mb-4">{t('whyEyebrow')}</p>
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-text">
-            La vitesse est un atout stratégique
+            {t('whyTitle')}
           </h2>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {whyPoints.map((point) => {
             const Icon = point.icon;
@@ -92,15 +65,13 @@ export default function AProposPage() {
         </div>
       </section>
 
-      {/* ── Nos valeurs ───────────────────────────────────────────────────── */}
       <section className="max-w-5xl mx-auto px-6 pb-20">
         <div className="text-center mb-12">
-          <p className="velifa-eyebrow mb-4">Notre approche</p>
+          <p className="velifa-eyebrow mb-4">{t('valuesEyebrow')}</p>
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-text">
-            Ce qui guide Velifa
+            {t('valuesTitle')}
           </h2>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {values.map((value) => {
             const Icon = value.icon;
@@ -118,32 +89,28 @@ export default function AProposPage() {
         </div>
       </section>
 
-      {/* ── CTA ───────────────────────────────────────────────────────────── */}
       <section className="max-w-5xl mx-auto px-6 pb-24">
         <div className="velifa-card text-center py-12 px-6">
           <h2 className="font-heading text-2xl md:text-3xl font-bold text-text mb-4">
-            Prêt à améliorer votre site ?
+            {t('ctaTitle')}
           </h2>
           <p className="text-text-muted mb-8 max-w-md mx-auto text-sm leading-relaxed">
-            Lancez votre premier audit gratuit en quelques secondes. Aucun compte requis.
+            {t('ctaSubtitle')}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/" className="velifa-btn">
-              Lancer un audit gratuit
+              {t('ctaButton')}
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link href="/tarifs" className="velifa-btn velifa-btn--ghost">
-              Voir les tarifs
+              {t('ctaSecondary')}
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ── Footer note ───────────────────────────────────────────────────── */}
       <div className="max-w-5xl mx-auto px-6 pb-16 text-center">
-        <p className="text-text-subtle text-xs">
-          Velifa effectue les audits de performance. Les scores sont calculés selon une méthodologie reconnue.
-        </p>
+        <p className="text-text-subtle text-xs">{t('footerNote')}</p>
       </div>
     </main>
   );

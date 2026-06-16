@@ -7,6 +7,7 @@ import {
   Loader2, User, Bell, AlertTriangle, Mail, Shield,
   ToggleLeft, ToggleRight,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 // ── localStorage keys ────────────────────────────────────────────────────────
 const LS_KEY = 'velifa_notifications';
@@ -22,8 +23,8 @@ function loadPrefs(): NotifPrefs {
 }
 
 // ── Toggle ────────────────────────────────────────────────────────────────────
-function Toggle({ on, onToggle, label, description }: {
-  on: boolean; onToggle: () => void; label: string; description: string;
+function Toggle({ on, onToggle, label, description, enableLabel, disableLabel }: {
+  on: boolean; onToggle: () => void; label: string; description: string; enableLabel: string; disableLabel: string;
 }) {
   return (
     <div className="flex items-center justify-between gap-4 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
@@ -33,7 +34,7 @@ function Toggle({ on, onToggle, label, description }: {
       </div>
       <button
         onClick={onToggle}
-        aria-label={`${on ? 'Désactiver' : 'Activer'} ${label}`}
+        aria-label={`${on ? disableLabel : enableLabel} ${label}`}
         className="flex-shrink-0 transition-all"
       >
         {on
@@ -72,6 +73,7 @@ export default function SettingsPage() {
   const { isLoaded, isSignedIn } = useAuth();
   const { user } = useUser();
   const [prefs, setPrefs] = useState<NotifPrefs>({ emailReports: true, perfAlerts: false, newsletter: false });
+  const t = useTranslations('settings');
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) router.push('/sign-in');
@@ -96,7 +98,7 @@ export default function SettingsPage() {
     );
   }
 
-  const fullName = user?.fullName ?? user?.firstName ?? user?.username ?? 'Utilisateur';
+  const fullName = user?.fullName ?? user?.firstName ?? user?.username ?? t('defaultUser');
   const email    = user?.primaryEmailAddress?.emailAddress ?? '';
   const initial  = (user?.firstName?.[0] ?? user?.username?.[0] ?? 'U').toUpperCase();
 
@@ -115,16 +117,15 @@ export default function SettingsPage() {
 
           {/* Header */}
           <div className="fade-up">
-          
             <h1 className="font-heading font-bold text-3xl sm:text-4xl text-text tracking-tight">
-              Paramètres
+              {t('title')}
             </h1>
-            <p className="text-text-muted mt-2 text-sm">Gérez votre profil et vos préférences.</p>
+            <p className="text-text-muted mt-2 text-sm">{t('subtitle')}</p>
           </div>
 
           {/* Profil */}
           <div className="fade-up" style={{ animationDelay: '60ms' }}>
-            <Section title="Profil" icon={User}>
+            <Section title={t('profileTitle')} icon={User}>
               <div className="flex items-center gap-5">
                 <div
                   className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold flex-shrink-0"
@@ -139,7 +140,7 @@ export default function SettingsPage() {
                 <div className="flex-1 min-w-0 space-y-3">
                   <div>
                     <label className="text-[10px] font-semibold tracking-widest uppercase text-text-subtle block mb-1">
-                      Nom complet
+                      {t('fullName')}
                     </label>
                     <div
                       className="px-3 py-2 rounded-[var(--velifa-radius-md)] text-sm text-text"
@@ -150,7 +151,7 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <label className="text-[10px] font-semibold tracking-widest uppercase text-text-subtle block mb-1">
-                      Email
+                      {t('email')}
                     </label>
                     <div
                       className="flex items-center gap-2 px-3 py-2 rounded-[var(--velifa-radius-md)] text-sm"
@@ -160,7 +161,7 @@ export default function SettingsPage() {
                       {email}
                     </div>
                     <p className="text-[11px] text-text-subtle mt-1">
-                      L&apos;email est géré par votre compte Clerk et ne peut pas être modifié ici.
+                      {t('emailNote')}
                     </p>
                   </div>
                 </div>
@@ -170,25 +171,31 @@ export default function SettingsPage() {
 
           {/* Notifications */}
           <div className="fade-up" style={{ animationDelay: '100ms' }}>
-            <Section title="Notifications" icon={Bell}>
+            <Section title={t('notificationsTitle')} icon={Bell}>
               <Toggle
                 on={prefs.emailReports}
                 onToggle={() => toggle('emailReports')}
-                label="Recevoir les rapports par email"
-                description="Un email récapitulatif après chaque audit terminé."
+                label={t('notif1Label')}
+                description={t('notif1Desc')}
+                enableLabel={t('enable')}
+                disableLabel={t('disable')}
               />
               <Toggle
                 on={prefs.perfAlerts}
                 onToggle={() => toggle('perfAlerts')}
-                label="Alertes de performance"
-                description="Notification si un score chute sous votre seuil configuré."
+                label={t('notif2Label')}
+                description={t('notif2Desc')}
+                enableLabel={t('enable')}
+                disableLabel={t('disable')}
               />
               <div className="py-4">
                 <Toggle
                   on={prefs.newsletter}
                   onToggle={() => toggle('newsletter')}
-                  label="Newsletter Velifa"
-                  description="Actualités, conseils SEO et nouvelles fonctionnalités."
+                  label={t('notif3Label')}
+                  description={t('notif3Desc')}
+                  enableLabel={t('enable')}
+                  disableLabel={t('disable')}
                 />
               </div>
             </Section>
@@ -196,12 +203,12 @@ export default function SettingsPage() {
 
           {/* Danger zone */}
           <div className="fade-up" style={{ animationDelay: '140ms' }}>
-            <Section title="Zone dangereuse" icon={AlertTriangle}>
+            <Section title={t('dangerTitle')} icon={AlertTriangle}>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm font-medium text-text">Supprimer mon compte</p>
+                  <p className="text-sm font-medium text-text">{t('deleteAccount')}</p>
                   <p className="text-xs text-text-muted mt-0.5">
-                    Cette action est irréversible. Toutes vos données seront effacées.
+                    {t('deleteAccountDesc')}
                   </p>
                 </div>
                 <div className="relative group">
@@ -215,7 +222,7 @@ export default function SettingsPage() {
                     }}
                   >
                     <Shield className="w-3.5 h-3.5" />
-                    Supprimer mon compte
+                    {t('deleteAccount')}
                   </button>
                   <div
                     className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2
@@ -228,7 +235,7 @@ export default function SettingsPage() {
                       boxShadow: '0 4px 16px rgba(0,0,0,0.55)',
                     }}
                   >
-                    Contactez le support à support@velifa.com
+                    {t('deleteTooltip')}
                   </div>
                 </div>
               </div>
